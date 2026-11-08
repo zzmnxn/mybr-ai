@@ -1,0 +1,11 @@
+---
+import { url } from '../lib/site';
+interface Props { id: string; title: string }
+const { id, title } = Astro.props;
+---
+<li class="entry entry-plan" data-row={id}>
+  <a href={url(`/topics/${id}`)}>
+    <i class="gdot g-plan" aria-hidden="true"></i>
+    <span class="e-main"><b>{title}</b></span>
+  </a>
+</li>

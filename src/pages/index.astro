@@ -1,11 +1,21 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import GrowthDot from '../components/GrowthDot.astro';
+import Shell from '../layouts/Shell.astro';
+import { getNotes, noteUrl } from '../lib/graph';
+import { month } from '../lib/site';
+const recent = (await getNotes()).slice(0, 3);
 ---
-
-<Layout>
-	<Welcome />
-</Layout>
+<Shell view="map">
+  <h1 class="visually-hidden">mybr.ai</h1>
+  <section class="recent" aria-label="최근 글">
+    <h2>최근 글</h2>
+    {recent.length === 0 && <p class="hand">아직 쓴 글이 없어요</p>}
+    <ul>
+      {recent.map((n) => (
+        <li class="row" data-row={n.data.uid} data-written="1">
+          <a href={noteUrl(n)}><GrowthDot growth={n.data.growth} /><span>{n.data.title}<small>{month(n.data.publishedAt)}</small></span></a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Shell>

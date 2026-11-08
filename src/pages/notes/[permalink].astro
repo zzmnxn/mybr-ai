@@ -1,0 +1,36 @@
+---
+import { render } from 'astro:content';
+import Close from '../../components/Close.astro';
+import Related from '../../components/Related.astro';
+import Shell from '../../layouts/Shell.astro';
+import { getNotes } from '../../lib/graph';
+import { GROWTH, KIND_LABEL, SECTIONS, month, url } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  return notes.map((note) => ({ params: { permalink: note.data.permalink }, props: { note } }));
+}
+const { note } = Astro.props;
+const d = note.data;
+const { Content } = await render(note);
+const section = SECTIONS[d.section];
+const topics = [...d.domains, ...d.tags];
+---
+<Shell title={d.title} description={d.summary} view="note" active={d.section} section={d.section} focus={d.uid}>
+  <article id="note" data-uid={d.uid}>
+    <Close list={{ href: url(section.path) }} />
+    <h1 tabindex="-1">{d.title}</h1>
+    <p class="note-sum">{d.summary}</p>
+    <p class="hand note-meta">
+      {month(d.publishedAt)}, {GROWTH[d.growth]} 단계, {section.label}의 {KIND_LABEL[d.kind]}.
+      {d.updatedAt && ` ${month(d.updatedAt)}에 고침.`}
+      {d.publication === 'archived' && ' 보관됨.'}
+    </p>
+    <div class="prose"><Content /></div>
+    {d.references && d.references.length > 0 && (
+      <section class="references"><h2>참고</h2><ul>{d.references.map((r) => <li><a href={r.url}>{r.title}</a></li>)}</ul></section>
+    )}
+    <div class="related-end"><Related uid={d.uid} topics={topics} /></div>
+  </article>
+  <aside slot="side" class="side" aria-label="이어진 글"><Related uid={d.uid} topics={topics} /></aside>
+</Shell>

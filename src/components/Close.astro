@@ -1,0 +1,9 @@
+---
+import { url } from '../lib/site';
+interface Props { list?: { href: string } }
+const { list } = Astro.props;
+---
+<div class="note-nav">
+  {list && <a class="close" data-back href={list.href}>글 목록으로</a>}
+  <a class="close" data-back={list ? undefined : ''} href={url('/')}>뇌로 돌아가기</a>
+</div>

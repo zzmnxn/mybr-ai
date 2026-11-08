@@ -22,3 +22,14 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# local-only working docs (not published)
+docs/planning/
+docs/design/
+
+# design skill used only during initial design (not committed)
+.agents/
+skills-lock.json
+
+# Claude Code local settings
+.claude/settings.local.json

@@ -1,0 +1,21 @@
+---
+import Close from './Close.astro';
+import Filters from './Filters.astro';
+import NoteEntry from './NoteEntry.astro';
+import PlanEntry from './PlanEntry.astro';
+import type { Note } from '../lib/graph';
+import type { SectionKey } from '../lib/site';
+interface Props { title: string; note: string; notes: Note[]; plans: { id: string; title: string }[]; section?: SectionKey; filterable?: boolean }
+const { title, note, notes, plans, section, filterable = true } = Astro.props;
+---
+<Close />
+<h1 id="list-title" tabindex="-1">{title}</h1>
+<p class="hand list-note" id="list-note">{note}</p>
+{filterable && <details class="filter-box"><summary>필터</summary><Filters section={section} /></details>}
+<div id="listbody">
+  {notes.length > 0
+    ? <ul class="entries" data-posts>{notes.map((n) => <NoteEntry note={n} />)}</ul>
+    : <p class="hand">아직 쓴 글이 없어요</p>}
+  <p class="hand no-match" hidden>이 조건에 맞는 글이 아직 없어요</p>
+  {plans.length > 0 && <div class="plans"><h2>앞으로 쓸 글</h2><ul class="entries">{plans.map((p) => <PlanEntry id={p.id} title={p.title} />)}</ul></div>}
+</div>

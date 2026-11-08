@@ -1,0 +1,20 @@
+---
+import ListView from '../../components/ListView.astro';
+import Shell from '../../layouts/Shell.astro';
+import { connected, getGraph, getNotes } from '../../lib/graph';
+
+export async function getStaticPaths() {
+  const graph = await getGraph();
+  return graph.viewNodes.filter((n) => !['section', 'heading'].includes(n.type)).map((n) => ({ params: { id: n.id }, props: { node: n } }));
+}
+const { node } = Astro.props;
+const graph = await getGraph();
+const { posts, plans } = connected(graph, node.id);
+const notes = (await getNotes()).filter((n) => posts.includes(n.data.uid));
+const titles = new Map(graph.viewNodes.map((n) => [n.id, n.label]));
+const planned = node.type === 'planned';
+const note = planned ? '아직 못 쓴 글이에요' : notes.length ? '이 주제와 이어진 글이에요' : '아직 이어진 글이 없어요';
+---
+<Shell title={node.label} view="list" focus={node.id}>
+  <ListView title={node.label} note={note} notes={notes} plans={plans.map((id) => ({ id, title: titles.get(id) ?? id }))} filterable={false} />
+</Shell>

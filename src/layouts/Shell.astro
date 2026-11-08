@@ -1,0 +1,77 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Sidebar from '../components/Sidebar.astro';
+import { url, type SectionKey } from '../lib/site';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  view: 'map' | 'list' | 'note' | 'about';
+  active?: SectionKey | 'all';
+  section?: SectionKey;
+  focus?: string;
+}
+const { title, description = 'my digital brain, powered by ai.', view, active, section, focus } = Astro.props;
+const pageTitle = title ? `${title} | mybr.ai` : 'mybr.ai';
+---
+<!doctype html>
+<html lang="ko" transition:animate="none">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={view === 'note' ? 'article' : 'website'} />
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=IBM+Plex+Mono:wght@400&family=Nanum+Pen+Script&display=swap" />
+    <script is:inline>
+      (function () {
+        function apply() {
+          var r = document.documentElement;
+          r.classList.add('js');
+          try { r.toggleAttribute('data-fold', JSON.parse(localStorage.getItem('mybr-fold')) === true); } catch (e) {}
+        }
+        apply();
+        document.addEventListener('astro:after-swap', apply);
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <div class="app" data-state={view === 'map' ? 'map' : 'read'}>
+      <Sidebar active={active} />
+      <div class="stage">
+        <div class="brainbox" transition:persist="brain">
+          <button class="unfold" type="button">사이드바 펼치기</button>
+          <svg id="brain" role="group" aria-label="글과 주제를 잇는 뇌 그래프. 같은 내용은 글 목록으로도 볼 수 있습니다."></svg>
+          <div class="tools">
+            <button class="stop" type="button" aria-pressed="false">움직임 멈추기</button>
+            <button class="z-fit" type="button">맞춤</button>
+            <button class="z-out" type="button" aria-label="축소">−</button>
+            <button class="z-in" type="button" aria-label="확대">+</button>
+          </div>
+          <svg id="threads" aria-hidden="true"></svg>
+        </div>
+        {view !== 'map' && (
+          <>
+            <div class="progress" aria-hidden="true"></div>
+            <main class="reader" data-view={view} data-section={section} data-focus={focus}>
+              <div class="reader-in"><slot /></div>
+            </main>
+          </>
+        )}
+        <slot name="side" />
+      </div>
+      {view === 'map' && <main class="home" data-view="map"><slot /></main>}
+    </div>
+    <script>
+      import '../scripts/app';
+    </script>
+  </body>
+</html>

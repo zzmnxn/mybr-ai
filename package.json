@@ -9,9 +9,29 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "verify": "node scripts/verify-content.mjs",
+    "check": "astro check",
+    "prebuild": "node scripts/verify-content.mjs"
   },
   "dependencies": {
-    "astro": "^7.4.7"
+    "astro": "^7.4.7",
+    "d3-drag": "^3.0.1",
+    "d3-ease": "^3.0.2",
+    "d3-force": "^3.0.1",
+    "d3-selection": "^3.0.1",
+    "d3-transition": "^3.0.2",
+    "d3-zoom": "^3.0.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-ease": "^3.0.2",
+    "@types/d3-force": "^3.0.10",
+    "@types/d3-selection": "^3.0.12",
+    "@types/d3-transition": "^3.0.9",
+    "@types/d3-zoom": "^3.0.9",
+    "typescript": "^6.0.3",
+    "yaml": "^2.9.1"
   }
 }

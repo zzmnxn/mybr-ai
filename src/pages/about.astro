@@ -1,0 +1,62 @@
+---
+import Close from '../components/Close.astro';
+import Shell from '../layouts/Shell.astro';
+import { getGraph } from '../lib/graph';
+const graph = await getGraph();
+---
+<Shell title="About" view="about">
+  <article id="about">
+    <Close />
+    <h1 tabindex="-1">내 뇌에서 공개된 부분이다</h1>
+    <div class="prose">
+      <p>내가 배우고, 만들고, 실패하고, 해결하며 쌓은 지식을 하나의 디지털 두뇌처럼 보여 주는 공개 기술 기록 공간이다. 일반 블로그처럼 글을 하나씩 읽어도 되고, 점을 따라 옮겨 다녀도 된다.</p>
+      <h2>이렇게 보면 된다</h2>
+      <table>
+        <thead><tr><th scope="col">하고 싶은 일</th><th scope="col">방법</th></tr></thead>
+        <tbody>
+          <tr><td>글 찾기</td><td>왼쪽의 전체 글이나 Knowledge, Experience, AI Hub를 누른다. 글 목록이 본문 자리에 열린다.</td></tr>
+          <tr><td>글 좁히기</td><td>왼쪽 필터에서 성장 단계, 글 종류, 분야, 태그를 고른다. 사이드바는 접을 수 있다.</td></tr>
+          <tr><td>글 읽기</td><td>글 제목이나 그래프의 글 점을 누른다. 글이 열리고, 오른쪽에 이어진 글이 나온다.</td></tr>
+          <tr><td>주제별로 모아 보기</td><td>그래프의 아무 점이나 누른다. 그 점과 이어진 글 목록이 열린다.</td></tr>
+          <tr><td>그래프 둘러보기</td><td>휠이나 두 손가락으로 확대하고, 배경을 끌어 옮기고, 점을 끌어 흔든다. 오른쪽 아래 버튼으로도 조작할 수 있다.</td></tr>
+          <tr><td>움직임 끄기</td><td>오른쪽 아래의 움직임 멈추기를 누른다.</td></tr>
+        </tbody>
+      </table>
+      <h2>점 읽는 법</h2>
+      <ul class="legend">
+        <li><i class="gdot g-engram"></i><span>내가 쓴 글이다. 다듬을수록 점이 커지고, Impulse, Synapse, Engram마다 점 모양이 다르다.</span></li>
+        <li><i class="lg-hub"></i><span>세 영역 Knowledge, Experience, AI Hub다.</span></li>
+        <li><i class="lg-tag"></i><span>글의 소제목, 종류, 분야, 태그다.</span></li>
+        <li><i class="gdot g-plan"></i><span>앞으로 쓸 글이다. 아직 글은 없다.</span></li>
+        <li><i class="lg-walk"></i><span>내가 지나간 길이다. 읽는 사람의 브라우저에만 저장되고, 어디로도 보내지 않는다.</span></li>
+      </ul>
+      <h2>전체 구조</h2>
+      <p>글 하나는 파일 하나다. 글마다 큰 영역 하나, 글 종류 하나, 여러 주제가 붙는다. 분류보다 글 사이의 연결이 중요하다.</p>
+      <table>
+        <thead><tr><th scope="col">영역</th><th scope="col">담는 글</th></tr></thead>
+        <tbody>
+          <tr><td>Knowledge</td><td>공부한 개념, 비교, 가이드</td></tr>
+          <tr><td>Experience</td><td>트러블슈팅, 프로젝트, 문제 풀이, 회고</td></tr>
+          <tr><td>AI Hub</td><td>직접 써 본 플러그인, 스킬, 워크플로의 후기와 실험, 이 사이트를 만든 기록</td></tr>
+        </tbody>
+      </table>
+      <p>글은 다듬는 정도에 따라 세 단계로 자란다. 공개 여부와는 상관없고, 언제든 다시 고칠 수 있다. 뇌의 공식적인 단계가 아니라 이 사이트에서 쓰려고 지은 이름이다.</p>
+      <table>
+        <thead><tr><th scope="col">단계</th><th scope="col">뜻</th></tr></thead>
+        <tbody>
+          <tr><td>Impulse</td><td>처음 기록한 내용</td></tr>
+          <tr><td>Synapse</td><td>연결하고 보완하는 내용</td></tr>
+          <tr><td>Engram</td><td>충분히 검토한 내용</td></tr>
+        </tbody>
+      </table>
+      <p>글은 Markdown 파일로 쓰고, Astro로 정적 페이지를 만든다. 서버와 데이터베이스는 없다.</p>
+    </div>
+    <details class="about-list">
+      <summary>그래프 내용을 목록으로 보기</summary>
+      <ul>
+        {graph.nodes.map((n) => <li><a href={n.url}>{n.title}</a></li>)}
+        {graph.viewNodes.filter((n) => n.type !== 'heading').map((n) => <li>{n.url ? <a href={n.url}>{n.label}</a> : n.label}{n.type === 'planned' && ' (아직 안 쓴 글)'}</li>)}
+      </ul>
+    </details>
+  </article>
+</Shell>

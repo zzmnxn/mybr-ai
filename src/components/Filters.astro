@@ -1,0 +1,34 @@
+---
+import GrowthDot from './GrowthDot.astro';
+import { getNotes } from '../lib/graph';
+import { DOMAINS, GROWTH, KIND_LABEL, KINDS_BY_SECTION, type SectionKey } from '../lib/site';
+interface Props { section?: SectionKey }
+const { section } = Astro.props;
+const notes = (await getNotes()).filter((n) => !section || n.data.section === section);
+const kinds = section ? KINDS_BY_SECTION[section] : [...new Set(notes.map((n) => n.data.kind))];
+const tags = [...new Set(notes.flatMap((n) => n.data.tags))];
+const groups = [
+  { name: 'growth', title: '성장 단계', values: Object.keys(GROWTH), label: (v: string) => GROWTH[v as keyof typeof GROWTH] },
+  { name: 'kind', title: '글 종류', values: kinds, label: (v: string) => KIND_LABEL[v] ?? v },
+  { name: 'domain', title: '분야', values: DOMAINS, label: (v: string) => v },
+  { name: 'tag', title: '태그', values: tags, label: (v: string) => v },
+].filter((g) => g.values.length > 0);
+---
+<div class="filters">
+  {groups.map((g) => (
+    <section>
+      <h2>{g.title}</h2>
+      <ul>
+        {g.values.map((v) => (
+          <li>
+            <button type="button" class="f" data-f={g.name} data-v={v} aria-pressed="false">
+              {g.name === 'growth' && <GrowthDot growth={v} />}
+              <span>{g.label(v)}</span><em>0</em>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+  <button type="button" class="f-clear" hidden>필터 지우기</button>
+</div>

@@ -1,0 +1,24 @@
+---
+import GrowthDot from './GrowthDot.astro';
+import { noteUrl, type Note } from '../lib/graph';
+import { GROWTH, KIND_LABEL, SECTIONS, month } from '../lib/site';
+interface Props { note: Note }
+const { note } = Astro.props;
+const d = note.data;
+---
+<li class="entry" data-row={d.uid} data-growth={d.growth} data-kind={d.kind} data-domains={d.domains.join(' ')} data-tags={JSON.stringify(d.tags)}>
+  <a href={noteUrl(note)}>
+    <GrowthDot growth={d.growth} />
+    <span class="e-main">
+      <b>{d.title}</b>
+      <span class="e-sum">{d.summary}</span>
+      <span class="e-meta">
+        <span>{GROWTH[d.growth]}</span>
+        <span>{SECTIONS[d.section].label} / {KIND_LABEL[d.kind]}</span>
+        {d.domains.length > 0 && <span>{d.domains.join(', ')}</span>}
+        <span>{month(d.publishedAt)}</span>
+        {d.publication === 'archived' && <span>보관됨</span>}
+      </span>
+    </span>
+  </a>
+</li>

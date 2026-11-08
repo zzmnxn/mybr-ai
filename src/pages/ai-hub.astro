@@ -1,0 +1,12 @@
+---
+import { getCollection } from 'astro:content';
+import ListView from '../components/ListView.astro';
+import Shell from '../layouts/Shell.astro';
+import { getNotes, sectionId } from '../lib/graph';
+const section = 'ai-hub';
+const notes = (await getNotes()).filter((n) => n.data.section === section);
+const plans = (await getCollection('planned')).filter((p) => p.data.section === section).map((p) => ({ id: p.data.id, title: p.data.title }));
+---
+<Shell title="AI Hub" view="list" active={section} section={section} focus={sectionId(section)}>
+  <ListView title="AI Hub" note={`글 ${notes.length}편`} notes={notes} plans={plans} section={section} />
+</Shell>

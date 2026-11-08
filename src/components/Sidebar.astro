@@ -1,0 +1,29 @@
+---
+import Filters from './Filters.astro';
+import { getNotes } from '../lib/graph';
+import { SECTIONS, url, type SectionKey } from '../lib/site';
+interface Props { active?: SectionKey | 'all'; }
+const { active } = Astro.props;
+const notes = await getNotes();
+const count = (s: SectionKey) => notes.filter((n) => n.data.section === s).length;
+const section = active && active !== 'all' ? active : undefined;
+---
+<aside class="pane" aria-label="사이드바">
+  <div class="head-row">
+    <a class="wordmark" href={url('/')}>mybr.ai</a>
+    <button class="fold" type="button">접기</button>
+  </div>
+  <nav aria-label="분류">
+    <ul class="cats">
+      <li><a class="cat" href={url('/notes')} aria-current={active === 'all' ? 'page' : undefined}>전체 글 <span>{notes.length}</span></a></li>
+      {(Object.keys(SECTIONS) as SectionKey[]).map((s) => (
+        <li><a class="cat" data-section={s} href={url(SECTIONS[s].path)} aria-current={active === s ? 'page' : undefined}>{SECTIONS[s].label} <span>{count(s)}</span></a></li>
+      ))}
+    </ul>
+  </nav>
+  <div class="filter-home"><Filters section={section} /></div>
+  <div class="pane-foot">
+    <a href={url('/about')}>About</a>
+    <button class="trail-clear" type="button" hidden>내 길 지우기</button>
+  </div>
+</aside>

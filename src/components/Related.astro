@@ -1,0 +1,21 @@
+---
+import { connected, getGraph, getNotes, noteUrl } from '../lib/graph';
+import { url } from '../lib/site';
+interface Props { uid: string; topics: string[] }
+const { uid, topics } = Astro.props;
+const graph = await getGraph();
+const notes = await getNotes();
+const { posts, plans } = connected(graph, uid);
+const labels = new Map(graph.viewNodes.map((n) => [n.id, n.label]));
+const postEntries = notes.filter((n) => posts.includes(n.data.uid));
+---
+<div class="related">
+  <h2>이어진 글</h2>
+  {postEntries.length + plans.length === 0 && <p class="hand">아직 이어진 글이 없어요</p>}
+  <ul>
+    {postEntries.map((n) => <li><a class="rel" data-row-hover={n.data.uid} href={noteUrl(n)}>{n.data.title}</a></li>)}
+    {plans.map((id) => <li><a class="rel rel-plan" data-row-hover={id} href={url(`/topics/${id}`)}>{labels.get(id)}</a></li>)}
+  </ul>
+  {plans.length > 0 && <p class="hand">흐린 글은 아직 못 썼어요</p>}
+  {topics.length > 0 && <><h2>이 글의 주제</h2><p>{topics.join(', ')}</p></>}
+</div>
