@@ -18,9 +18,9 @@
 }
 :root {
   color-scheme: light;
-  --color-code: var(--color-paper-2); --color-marker: #BDE7FB; --color-white: var(--color-paper);
+  --color-code: var(--color-paper-2); --color-marker: #CCD7E9; --color-white: var(--color-paper);
   --color-page: var(--color-paper); --color-page-2: var(--color-paper-2);
-  --color-trail: #8CD3F5; --color-ring: var(--color-trail); --color-pane-edge: var(--color-rule);
+  --color-trail: #4568A0; --color-path: color-mix(in srgb, var(--color-trail) 45%, var(--color-paper)); --color-ring: var(--color-trail); --color-pane-edge: var(--color-rule);
   --font-code: "IBM Plex Mono", ui-monospace, monospace; --measure: 42rem; --read-size: 1.125rem; --read-leading: 1.9;
   --display-weight: 400; --tracking-display: -0.01em; --radius-card: 14px;
 }
@@ -28,7 +28,7 @@
   color-scheme: dark;
   --color-paper: #151515; --color-paper-2: #202020; --color-paper-3: #2A2A2A;
   --color-ink: #F2F2F2; --color-ink-2: #CCCCCC; --color-muted: #AAAAAA;
-  --color-rule: #3D3D3D; --color-marker: #294451; --color-trail: #8CD3F5;
+  --color-rule: #3D3D3D; --color-marker: #273751; --color-trail: #8DAADE;
 }
 /* Keep system dark mode available even without JavaScript. */
 @media (prefers-color-scheme: dark) {
@@ -36,6 +36,6 @@
     color-scheme: dark;
     --color-paper: #151515; --color-paper-2: #202020; --color-paper-3: #2A2A2A;
     --color-ink: #F2F2F2; --color-ink-2: #CCCCCC; --color-muted: #AAAAAA;
-    --color-rule: #3D3D3D; --color-marker: #294451; --color-trail: #8CD3F5;
+    --color-rule: #3D3D3D; --color-marker: #273751; --color-trail: #8DAADE;
   }
 }
