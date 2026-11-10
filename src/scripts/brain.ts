@@ -24,8 +24,9 @@ const el = <K extends keyof SVGElementTagNameMap>(name: K, attrs: Record<string,
   for (const k in attrs) e.setAttribute(k, String(attrs[k]));
   return e;
 };
-const SIZE: Record<Kind, number> = { post: 9, hub: 10, real: 7, tag: 6, ghost: 4.5 };
-const GROWTH: Record<string, number> = { impulse: 9, synapse: 14, engram: 20 };
+// Obsidian식: 기본 점은 작게, 연결이 많을수록 sqrt로 커진다.
+const SIZE: Record<Kind, number> = { post: 4.2, hub: 6, real: 2.2, tag: 2.8, ghost: 2.6 };
+const GROWTH: Record<string, number> = { impulse: 4.2, synapse: 5.2, engram: 6.4 };
 
 export type Brain = ReturnType<typeof createBrain>;
 
@@ -36,7 +37,9 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
   const gT = world.appendChild(el('g')), gE = world.appendChild(el('g')), gP = world.appendChild(el('g')), gN = world.appendChild(el('g'));
   const trailLine = gT.appendChild(el('polyline', { class: 'trail' }));
 
-  const nodes = opt.nodes.map((d, i) => ({ ...d, r: (d.growth ? GROWTH[d.growth] : SIZE[d.kind]) * sc, ph: i * 1.7, ox: 0, oy: 0, px: 0, py: 0, x: 0, y: 0 })) as Node[];
+  const deg = new Map<string, number>();
+  opt.links.forEach((l) => { deg.set(l.source, (deg.get(l.source) ?? 0) + 1); deg.set(l.target, (deg.get(l.target) ?? 0) + 1); });
+  const nodes = opt.nodes.map((d, i) => ({ ...d, r: ((d.growth ? GROWTH[d.growth] : SIZE[d.kind]) + Math.min(5, Math.sqrt(deg.get(d.id) ?? 0) * 0.7)) * sc, ph: i * 1.7, ox: 0, oy: 0, px: 0, py: 0, x: 0, y: 0 })) as Node[];
   const byId = new Map(nodes.map((d) => [d.id, d]));
   const usable = opt.links.filter((l) => byId.has(l.source) && byId.has(l.target));
   const links = usable.map((l) => ({ ...l, line: gE.appendChild(el('line', { class: 'edge' })) })) as Link[];
@@ -51,11 +54,11 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
   for (const d of nodes) {
     const g = el(d.url ? 'a' : 'g', { class: `n n-${d.kind}` }) as SVGElement;
     if (d.url) g.setAttribute('href', d.url);
-    g.appendChild(el('circle', { class: 'node-aura', r: d.r + 11 * sc }));
+    g.appendChild(el('circle', { class: 'node-aura', r: d.r + 7 * sc }));
     g.appendChild(el('circle', { class: 'ring', r: d.r }));
-    if (d.growth && d.growth !== 'impulse') g.appendChild(el('circle', { class: `halo halo-${d.growth}`, r: d.r + 5 * sc }));
+    if (d.growth && d.growth !== 'impulse') g.appendChild(el('circle', { class: `halo halo-${d.growth}`, r: d.r + 3 * sc }));
     g.appendChild(el('circle', { class: 'dot', r: d.r }));
-    g.appendChild(el('text', { y: d.r + 15 * sc + 2, 'text-anchor': 'middle' })).textContent = d.short ?? d.label;
+    g.appendChild(el('text', { y: d.r + 12 * sc + 2, 'text-anchor': 'middle' })).textContent = d.short ?? d.label;
     g.appendChild(el('title')).textContent = d.label + (d.kind === 'ghost' ? ', 아직 쓰지 않은 글' : '');
     d.g = g; gN.appendChild(g);
     g.addEventListener('pointerenter', () => setHover(d.id));
@@ -82,7 +85,7 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
   function fire(a: string, b: string, hops: number) {
     const from = byId.get(a), to = byId.get(b);
     if (paused || pulses.length > 28 || !from || !to) return;
-    pulses.push({ a: from, b: to, t: 0, hops, c: gP.appendChild(el('circle', { class: 'pulse', r: 3.4, cx: from.px, cy: from.py })) });
+    pulses.push({ a: from, b: to, t: 0, hops, c: gP.appendChild(el('circle', { class: 'pulse', r: 2.4, cx: from.px, cy: from.py })) });
   }
   function flash(d: Node) { d.g.classList.remove('fire'); void d.g.getBoundingClientRect(); d.g.classList.add('fire'); }
 
@@ -99,12 +102,20 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
     if (d.x < m) v.vx += 1.2; if (d.x > W - m) v.vx -= 1.2; if (d.y < m) v.vy += 1.2; if (d.y > H - m) v.vy -= 1.2;
     if (gathered) { const s = gathered.has(d.id) ? 0.012 : -0.012; v.vx += (cx - d.x) * s; v.vy += (cy - d.y) * s; }
   });
+  // 뇌 윤곽: 타원 밖으로 나간 점을 안쪽으로 밀고, 가운데 세로 틈(대뇌 종열)에서는 좌우로 갈라 두 반구를 만든다.
+  const ry = Math.sqrt(nodes.length) * 9.5 * opt.spread, rx = ry * 1.3;
+  const shape = (a: number) => nodes.forEach((d) => {
+    const v = d as Required<SimulationNodeDatum>, dx = d.x - cx, dy = d.y - cy, e = (dx / rx) ** 2 + (dy / ry) ** 2;
+    if (e > 1) { const f = Math.min(1.5, (Math.sqrt(e) - 1) * 0.35 + 0.05) * a * 6; v.vx -= dx * f / Math.sqrt(e) * 0.08 * 6; v.vy -= dy * f / Math.sqrt(e) * 0.08 * 6; }
+    const gap = 16 * opt.spread, t = ry ? 1 - Math.min(1, Math.abs(dy) / ry) : 0;
+    if (Math.abs(dx) < gap) v.vx += (dx >= 0 ? 1 : -1) * (gap - Math.abs(dx)) * 0.04 * t;
+  });
   const near = (l: Link) => (l.source as Node).kind === 'post' || (l.target as Node).kind === 'post';
   const sim = forceSimulation<Node>(nodes)
     .force('link', forceLink<Node, Link>(links).id((d) => d.id).distance((l) => (near(l) ? 76 : 54) * opt.spread).strength(0.55))
     .force('charge', forceManyBody<Node>().strength(-170 * opt.spread))
-    .force('collide', forceCollide<Node>((d) => d.r + 9))
-    .force('x', forceX<Node>(cx).strength(0.05)).force('y', forceY<Node>(cy).strength(0.065)).force('keep', keep)
+    .force('collide', forceCollide<Node>((d) => d.r + 6))
+    .force('x', forceX<Node>(cx).strength(0.05)).force('y', forceY<Node>(cy).strength(0.065)).force('keep', keep).force('shape', shape as never)
     .alphaDecay(0.022).stop();
   if (reduce) for (let i = 0; i < 360; i++) sim.tick();
 

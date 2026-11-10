@@ -22,7 +22,11 @@ export const noteUrl = (n: Note) => url(`/notes/${n.data.permalink}`);
 
 export async function getNotes(): Promise<Note[]> {
   const notes = await getCollection('notes');
-  return notes.sort((a, b) => (b.data.publishedAt?.getTime() ?? 0) - (a.data.publishedAt?.getTime() ?? 0));
+  return notes.sort((a, b) =>
+    (b.data.publishedAt?.getTime() ?? 0) - (a.data.publishedAt?.getTime() ?? 0) ||
+    ((b.data.originalPublishedAt ?? b.data.publishedAt)?.getTime() ?? 0) -
+    ((a.data.originalPublishedAt ?? a.data.publishedAt)?.getTime() ?? 0),
+  );
 }
 
 let cached: Promise<GraphData> | undefined;

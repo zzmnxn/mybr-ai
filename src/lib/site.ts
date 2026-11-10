@@ -22,3 +22,4 @@ export const DOMAINS = ['backend', 'frontend', 'database', 'cloud', 'power-platf
 
 export const url = (path: string) => `${import.meta.env.BASE_URL.replace(/\/$/, '')}${path}`;
 export const month = (d?: Date) => (d ? `${d.getUTCFullYear()}.${String(d.getUTCMonth() + 1).padStart(2, '0')}` : '');
+export const day = (d?: Date) => (d ? `${month(d)}.${String(d.getUTCDate()).padStart(2, '0')}` : '');

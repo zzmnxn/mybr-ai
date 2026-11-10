@@ -1,10 +1,11 @@
 ---
 import { render } from 'astro:content';
+import GrowthDot from '../../components/GrowthDot.astro';
 import Close from '../../components/Close.astro';
 import Related from '../../components/Related.astro';
 import Shell from '../../layouts/Shell.astro';
-import { getNotes } from '../../lib/graph';
-import { GROWTH, KIND_LABEL, SECTIONS, month, url } from '../../lib/site';
+import { domainId, getNotes, tagId } from '../../lib/graph';
+import { GROWTH, KIND_LABEL, SECTIONS, day, url } from '../../lib/site';
 
 export async function getStaticPaths() {
   const notes = await getNotes();
@@ -21,11 +22,19 @@ const topics = [...d.domains, ...d.tags];
     <Close list={{ href: url(section.path) }} />
     <h1 tabindex="-1">{d.title}</h1>
     <p class="note-sum">{d.summary}</p>
-    <p class="hand note-meta">
-      {month(d.publishedAt)}, {GROWTH[d.growth]} 단계, {section.label}의 {KIND_LABEL[d.kind]}.
-      {d.updatedAt && ` ${month(d.updatedAt)}에 고침.`}
-      {d.publication === 'archived' && ' 보관됨.'}
-    </p>
+    <dl class="note-facts">
+      <div><dt>분류</dt><dd>{section.label} · {KIND_LABEL[d.kind]}</dd></div>
+      <div><dt>발행</dt><dd><time datetime={d.publishedAt?.toISOString().slice(0, 10)}>{day(d.publishedAt)}</time></dd></div>
+      {d.updatedAt && <div><dt>수정</dt><dd><time datetime={d.updatedAt.toISOString().slice(0, 10)}>{day(d.updatedAt)}</time></dd></div>}
+      <div><dt>단계</dt><dd><GrowthDot growth={d.growth} /> {GROWTH[d.growth]}</dd></div>
+      {d.publication === 'archived' && <div><dt>상태</dt><dd>보관됨</dd></div>}
+    </dl>
+    {topics.length > 0 && (
+      <ul class="note-chips" aria-label="도메인과 태그">
+        {d.domains.map((x) => <li><a class="chip chip-domain" href={url(`/topics/${encodeURIComponent(domainId(x))}`)}>{x}</a></li>)}
+        {d.tags.map((x) => <li><a class="chip" href={url(`/topics/${encodeURIComponent(tagId(x))}`)}>#{x}</a></li>)}
+      </ul>
+    )}
     <div class="prose"><Content /></div>
     {d.references && d.references.length > 0 && (
       <section class="references"><h2>참고</h2><ul>{d.references.map((r) => <li><a href={r.url}>{r.title}</a></li>)}</ul></section>

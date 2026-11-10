@@ -87,30 +87,30 @@ body { word-break: keep-all; overflow-wrap: break-word; }
 #brain .n { touch-action: none; }
 .n { cursor: pointer; transition: opacity var(--dur-short) var(--ease-out); }
 .node-aura { fill: var(--color-marker); opacity: 0; pointer-events: none; transition: opacity var(--dur-short) var(--ease-out); }
-.n-hub .node-aura { opacity: 0.22; }
-.n-post .node-aura { opacity: 0.14; }
+.n-hub .node-aura { opacity: 0.18; }
+.n-post .node-aura { opacity: 0.12; }
 .n:hover .node-aura, .n:focus-visible .node-aura, .n.lit .node-aura, .n.here .node-aura { opacity: 0.65; }
-.n .dot { fill: var(--color-ink); transition: transform var(--dur-short) var(--ease-out); transform-box: fill-box; transform-origin: center; }
-.n-post .dot { fill: var(--color-accent); stroke: var(--color-white); stroke-width: 3; }
-.n-hub .dot { fill: var(--color-accent); stroke: var(--color-paper); stroke-width: 2; }
+.n .dot { fill: color-mix(in srgb, var(--color-muted) 80%, var(--color-paper)); transition: transform var(--dur-short) var(--ease-out); transform-box: fill-box; transform-origin: center; }
+.n-post .dot { fill: var(--color-trail); }
+.n-hub .dot { fill: var(--color-ink-2); }
 .n-hub text { letter-spacing: 0.03em; }
-.n-tag .dot { fill: var(--color-ink-2); }
-.n-ghost .dot { fill: var(--color-white); stroke: var(--color-accent); stroke-width: 1.25; stroke-dasharray: 2 2; }
-.n text { fill: var(--color-ink); font-family: var(--font-body); font-size: 13px; paint-order: stroke; stroke: var(--color-paper); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; transition: opacity var(--dur-short) var(--ease-out); }
+.n-tag .dot { fill: var(--color-muted); }
+.n-ghost .dot { fill: var(--color-paper); stroke: var(--color-muted); stroke-width: 1; }
+.n text { fill: var(--color-ink); font-family: var(--font-body); font-size: 12px; paint-order: stroke; stroke: var(--color-paper); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; transition: opacity var(--dur-short) var(--ease-out); }
 .n-ghost text, .n-real text, .n-post text { opacity: 0; }
-.halo { fill: none; stroke: var(--color-accent); stroke-opacity: 0.6; }
+.halo { fill: none; stroke: var(--color-trail); stroke-opacity: 0.45; }
 .halo-synapse { stroke-width: 1; }
-.halo-engram { stroke-width: 2.5; }
+.halo-engram { stroke-width: 1.5; }
 .n-tag text { opacity: 0.75; }
-.n:hover .dot, .n:focus-visible .dot, .n.lit .dot { transform: scale(1.3); }
+.n:hover .dot, .n:focus-visible .dot, .n.lit .dot { transform: scale(1.25); fill: var(--color-trail); }
 .n.lit text, .n:hover text, .n:focus-visible text { opacity: 1; }
 .n:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
 .ring { fill: none; stroke: var(--color-ring); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; }
 .n.fire .ring { animation: ring var(--dur-long) var(--ease-out); }
 @keyframes ring { from { opacity: 0.95; transform: scale(1); } to { opacity: 0; transform: scale(3.2); } }
-.edge { stroke: var(--color-ink-2); stroke-opacity: 0.22; stroke-width: 1; stroke-linecap: round; transition: stroke-opacity var(--dur-short) var(--ease-out); }
-.edge.lit { stroke: var(--color-trail); stroke-opacity: 1; stroke-width: 2; }
-.pulse { fill: var(--color-marker); stroke: var(--color-accent); stroke-width: 1; pointer-events: none; }
+.edge { stroke: var(--color-muted); stroke-opacity: 0.28; stroke-width: 0.6; stroke-linecap: round; transition: stroke-opacity var(--dur-short) var(--ease-out); }
+.edge.lit { stroke: var(--color-trail); stroke-opacity: 0.9; stroke-width: 1.2; }
+.pulse { fill: var(--color-trail); stroke: none; pointer-events: none; }
 .trail { fill: none; stroke: var(--color-path); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; }
 .n.walked .dot { stroke: var(--color-path); stroke-width: 3; stroke-dasharray: none; }
 .focusing .n:not(.lit) { opacity: 0.22; }
@@ -118,7 +118,7 @@ body { word-break: keep-all; overflow-wrap: break-word; }
 .zoomed .n text { opacity: 1; }
 .mini .n text { opacity: 0; }
 .mini .n:hover text { opacity: 1; }
-.n.here .dot { fill: var(--color-accent); stroke: var(--color-marker); stroke-width: 4; transform: scale(1.5); }
+.n.here .dot { fill: var(--color-trail); stroke: var(--color-marker); stroke-width: 3; transform: scale(1.5); }
 .tools { position: absolute; z-index: var(--z-raised); right: var(--space-md); bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-2xs); }
 .tools button { min-width: 44px; min-height: 44px; padding: 0 var(--space-xs); border: 0; border-radius: var(--radius-pill); background: var(--color-paper-3); color: var(--color-ink); font-size: 1.125rem; cursor: pointer; transition: background-color var(--dur-micro) var(--ease-out); }
 .tools button:hover { background: var(--color-page); }
@@ -138,7 +138,14 @@ body { word-break: keep-all; overflow-wrap: break-word; }
 .reader h1 { max-width: none; margin-top: var(--space-md); font-size: clamp(2.125rem, 2vw + 1.25rem, 3rem); line-height: 1.3; overflow-wrap: break-word; min-width: 0; }
 .reader h1:focus { outline: none; }
 .note-sum { margin-top: var(--space-md); color: var(--color-ink-2); line-height: 1.7; }
-.note-meta { margin-top: var(--space-sm); }
+.note-facts { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); margin: var(--space-md) 0 0; padding: var(--space-sm) 0; border-block: 1px solid var(--color-rule); font-size: var(--text-sm); }
+.note-facts > div { display: flex; align-items: center; gap: var(--space-2xs); }
+.note-facts dt { color: var(--color-muted); }
+.note-facts dd { margin: 0; display: inline-flex; align-items: center; gap: 0.4em; font-variant-numeric: tabular-nums; }
+.note-chips { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin: var(--space-sm) 0 0; padding: 0; list-style: none; }
+.chip { display: inline-flex; align-items: center; min-height: 28px; padding: 0 0.7em; border: 1px solid var(--color-rule); border-radius: var(--radius-pill); color: var(--color-ink-2); font-size: var(--text-sm); text-decoration: none; }
+.chip:hover { border-color: var(--color-trail); color: var(--color-trail); }
+.chip-domain { background: var(--color-paper-2); color: var(--color-ink); }
 .prose { margin-top: var(--space-xl); font-size: var(--read-size); line-height: var(--read-leading); }
 .prose > * + * { margin-top: 1.2em; }
 .prose p { max-width: none; }
