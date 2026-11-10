@@ -225,10 +225,13 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
     fit(ms: number) { touched = false; fit(ms); },
     zoomBy(f: number) { touched = true; sel.interrupt(); if (reduce) sel.call(zoomer.scaleBy, f); else sel.transition().duration(220).call(zoomer.scaleBy, f); },
     miniOn(id: string | null, mx: number, my: number, k: number) {
-      const d = id ? byId.get(id) : undefined;
+      // 전체 그래프를 박스(약 300px) 안에 맞춘다. 선택한 글에 중심을 두면 바깥 점이 영역 밖으로 번진다.
+      void id;
       if (!mini) saved = view;
       mini = true; svg.classList.add('mini');
-      go(zoomIdentity.translate(mx - (d?.x ?? cx) * k, my - (d?.y ?? cy) * k).scale(k), 420);
+      const xs = nodes.map((d) => d.x), ys = nodes.map((d) => d.y), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+      const fitK = Math.min(k, 290 / (x1 - x0 || 1), 290 / (y1 - y0 || 1));
+      go(zoomIdentity.translate(mx - ((x0 + x1) / 2) * fitK, my - ((y0 + y1) / 2) * fitK).scale(fitK), 420);
     },
     miniOff() { if (!mini) return; mini = false; svg.classList.remove('mini'); go(saved ?? view, 420); },
     trail(list: string[]) { trail = list; nodes.forEach((d) => d.g.classList.toggle('walked', list.includes(d.id))); draw(performance.now()); },
