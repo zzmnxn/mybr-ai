@@ -4,7 +4,7 @@ import { z } from 'astro/zod';
 
 export const SECTION_KINDS = {
   knowledge: ['concept', 'comparison', 'guide'],
-  experience: ['troubleshooting', 'project', 'problem', 'retrospective'],
+  experience: ['troubleshooting', 'implementation', 'project', 'problem', 'retrospective'],
   'ai-hub': ['build-log', 'plugin-review', 'skill-review', 'workflow', 'experiment'],
 } as const;
 
@@ -19,6 +19,7 @@ const FIELDS_BY_KIND: Record<string, string[]> = {
   comparison: ['prerequisites', 'compared'],
   guide: ['prerequisites'],
   troubleshooting: ['environment', 'outcome', 'projectRefs'],
+  implementation: ['environment', 'stack', 'projectRefs'],
   project: ['period', 'role', 'stack', 'repoUrl', 'demoUrl'],
   problem: ['platform', 'problemUrl', 'difficulty', 'complexity'],
   retrospective: ['period', 'projectRefs'],

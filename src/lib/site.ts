@@ -10,12 +10,12 @@ export type Growth = keyof typeof GROWTH;
 
 export const KIND_LABEL: Record<string, string> = {
   concept: 'Concept', comparison: 'Comparison', guide: 'Guide',
-  troubleshooting: 'Troubleshooting', project: 'Project', problem: 'Problem', retrospective: 'Retrospective',
+  troubleshooting: 'Troubleshooting', implementation: 'Implementation', project: 'Project', problem: 'Problem', retrospective: 'Retrospective',
   'build-log': 'Build Log', 'plugin-review': 'Plugin Review', 'skill-review': 'Skill Review', workflow: 'Workflow', experiment: 'Experiment',
 };
 export const KINDS_BY_SECTION: Record<SectionKey, string[]> = {
   knowledge: ['concept', 'comparison', 'guide'],
-  experience: ['troubleshooting', 'project', 'problem', 'retrospective'],
+  experience: ['troubleshooting', 'implementation', 'project', 'problem', 'retrospective'],
   'ai-hub': ['build-log', 'plugin-review', 'skill-review', 'workflow', 'experiment'],
 };
 export const DOMAINS = ['backend', 'frontend', 'database', 'cloud', 'power-platform', 'ai-llm', 'algorithm', 'cs', 'devtools'];

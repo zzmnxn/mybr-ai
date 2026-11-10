@@ -213,4 +213,27 @@ npm run build
 
 ## 마지막 문단
 
+### Mermaid 흐름도
+
+```mermaid
+flowchart LR
+    accTitle: 글 이관 흐름 예시
+    accDescr: 원문을 보존하고 문체와 형식을 정돈한 뒤 검토 결과에 따라 공개하거나 다시 정돈한다.
+    A[원문 보존] --> B[문체·형식 정돈] --> C{검토 통과?}
+    C -->|예| D[공개]
+    C -->|아니요| B
+```
+
+### Mermaid 시퀀스 다이어그램
+
+```mermaid
+sequenceDiagram
+    accTitle: 정적 페이지 요청 예시
+    accDescr: 독자가 정적 호스팅에 글을 요청하면 호스팅이 빌드된 HTML을 반환한다.
+    participant R as 독자
+    participant H as 정적 호스팅
+    R->>H: 글 요청
+    H-->>R: 빌드된 HTML
+```
+
 **작은 장식이 글을 더 읽기 좋게 만드는지** 확인하는 것이 이 문서의 목적입니다. 앞부분으로 돌아가거나 화면 폭을 바꾸면서, 제목·인용문·코드·표가 하나의 디자인처럼 느껴지는지 비교해 보세요.

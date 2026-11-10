@@ -1,6 +1,7 @@
 import { navigate } from 'astro:transitions/client';
 import { createBrain, type Brain, type Kind, type NodeInput } from './brain';
 import type { GraphData } from '../lib/graph';
+import './mermaid';
 
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll<T>(s)];
@@ -160,6 +161,7 @@ function bindReader() {
     const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('inked'); io.unobserve(e.target); } }), { root: reader, rootMargin: '0px 0px -18% 0px' });
     $$('strong', prose).forEach((s) => io.observe(s));
     for (const pre of $$('pre', prose)) {
+      if (pre.dataset.language === 'mermaid' || pre.querySelector('code.language-mermaid')) continue;
       if (pre.parentElement?.classList.contains('code')) continue;
       const box = document.createElement('div'); box.className = 'code';
       pre.replaceWith(box); box.append(pre); pre.tabIndex = 0;
