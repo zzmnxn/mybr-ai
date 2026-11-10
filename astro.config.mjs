@@ -7,5 +7,5 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://zzmnxn.github.io',
   base: '/mybr-ai',
-  markdown: { shikiConfig: { theme: 'github-light-high-contrast' } },
+  markdown: { shikiConfig: { themes: { light: 'github-light-high-contrast', dark: 'github-dark-high-contrast' } } },
 });

@@ -4,4 +4,8 @@
 #   section: knowledge
 #   domains: [algorithm]
 #   near: [hub-example-note]
-[]
+- id: plan-devwiki
+  title: "devwiki: 개발 지식을 위키로 쌓는 방법"
+  section: ai-hub
+  domains: [ai-llm, devtools]
+  near: [hub-digital-brain-kickoff]

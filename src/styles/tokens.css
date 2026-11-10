@@ -11,9 +11,31 @@
   --color-paper: #FCFDFD; --color-paper-2: #F3F5F5; --color-paper-3: #ECEFEF;
   --color-ink: #111416; --color-ink-2: #3D4245; --color-muted: #666B6E;
   --color-rule: #DEE1E3;
-  --color-accent: #111416; --color-accent-ink: #FCFDFD; --color-focus: #111416;
+  --color-accent: var(--color-ink); --color-accent-ink: var(--color-paper); --color-focus: var(--color-ink);
   --font-display: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif; --font-body: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif; --font-outlier: "Nanum Pen Script", "Gowun Dodum", cursive;
   --radius-card: 4px; --radius-pill: 999px; --rule-hair: 1px; --shadow-card: none;
   --tracking-display: -0.02em;
 }
-:root { --color-code: #F3F5F5; --color-marker: #BDE7FB; --color-white: #FCFDFD; --color-page: #FCFDFD; --color-page-2: #F3F5F5; --color-trail: #8CD3F5; --color-ring: #8CD3F5; --color-pane-edge: #DEE1E3; --font-code: "IBM Plex Mono", ui-monospace, monospace; --measure: 42rem; --read-size: 1.125rem; --read-leading: 1.9; --display-weight: 400; --tracking-display: -0.01em; --radius-card: 14px; }
+:root {
+  color-scheme: light;
+  --color-code: var(--color-paper-2); --color-marker: #BDE7FB; --color-white: var(--color-paper);
+  --color-page: var(--color-paper); --color-page-2: var(--color-paper-2);
+  --color-trail: #8CD3F5; --color-ring: var(--color-trail); --color-pane-edge: var(--color-rule);
+  --font-code: "IBM Plex Mono", ui-monospace, monospace; --measure: 42rem; --read-size: 1.125rem; --read-leading: 1.9;
+  --display-weight: 400; --tracking-display: -0.01em; --radius-card: 14px;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: #151515; --color-paper-2: #202020; --color-paper-3: #2A2A2A;
+  --color-ink: #F2F2F2; --color-ink-2: #CCCCCC; --color-muted: #AAAAAA;
+  --color-rule: #3D3D3D; --color-marker: #294451; --color-trail: #8CD3F5;
+}
+/* Keep system dark mode available even without JavaScript. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-paper: #151515; --color-paper-2: #202020; --color-paper-3: #2A2A2A;
+    --color-ink: #F2F2F2; --color-ink-2: #CCCCCC; --color-muted: #AAAAAA;
+    --color-rule: #3D3D3D; --color-marker: #294451; --color-trail: #8CD3F5;
+  }
+}

@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar.astro';
 import { url, type SectionKey } from '../lib/site';
 import '../styles/tokens.css';
 import '../styles/global.css';
+import themeScript from '../scripts/theme.js?raw';
 
 interface Props {
   title?: string;
@@ -21,6 +22,8 @@ const pageTitle = title ? `${title} | mybr.ai` : 'mybr.ai';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <script is:inline set:html={themeScript} />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={pageTitle} />
@@ -44,6 +47,18 @@ const pageTitle = title ? `${title} | mybr.ai` : 'mybr.ai';
     <ClientRouter />
   </head>
   <body>
+    <details class="theme-control">
+      <summary aria-label="테마 선택">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10" cy="10" r="6.5" /><path d="M10 3.5a6.5 6.5 0 0 1 0 13Z" fill="currentColor" /></svg>
+        <span id="theme-choice">시스템</span>
+        <svg class="theme-chevron" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="m3 4.5 3 3 3-3" /></svg>
+      </summary>
+      <div class="theme-options" role="group" aria-label="테마">
+        <button type="button" data-theme-option="system" aria-pressed="true">시스템</button>
+        <button type="button" data-theme-option="light" aria-pressed="false">라이트</button>
+        <button type="button" data-theme-option="dark" aria-pressed="false">다크</button>
+      </div>
+    </details>
     <div class="app" data-state={view === 'map' ? 'map' : 'read'}>
       <Sidebar active={active} />
       <div class="stage">

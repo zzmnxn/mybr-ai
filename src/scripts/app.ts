@@ -147,6 +147,15 @@ function bindReader() {
   reader.addEventListener('scroll', spy, { passive: true });
   const prose = $('.prose', reader);
   if (prose) {
+    for (const link of $$<HTMLAnchorElement>('a[href]', prose)) {
+      if (!['http:', 'https:'].includes(link.protocol) || link.origin === location.origin || link.dataset.external) continue;
+      link.dataset.external = 'true';
+      const icon = document.createElement('span');
+      icon.className = 'external-icon'; icon.textContent = '↗'; icon.setAttribute('aria-hidden', 'true');
+      const hint = document.createElement('span');
+      hint.className = 'visually-hidden'; hint.textContent = ' (외부 링크)';
+      link.append(icon, hint);
+    }
     document.documentElement.classList.add('ink');
     const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('inked'); io.unobserve(e.target); } }), { root: reader, rootMargin: '0px 0px -18% 0px' });
     $$('strong', prose).forEach((s) => io.observe(s));
@@ -154,6 +163,9 @@ function bindReader() {
       if (pre.parentElement?.classList.contains('code')) continue;
       const box = document.createElement('div'); box.className = 'code';
       pre.replaceWith(box); box.append(pre); pre.tabIndex = 0;
+      const label = document.createElement('span');
+      label.className = 'code-label'; label.textContent = pre.dataset.language || 'code';
+      box.prepend(label);
       const copy = document.createElement('button');
       copy.type = 'button'; copy.className = 'copy'; copy.textContent = '복사'; box.prepend(copy);
       copy.addEventListener('click', async () => {

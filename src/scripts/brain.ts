@@ -51,6 +51,7 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
   for (const d of nodes) {
     const g = el(d.url ? 'a' : 'g', { class: `n n-${d.kind}` }) as SVGElement;
     if (d.url) g.setAttribute('href', d.url);
+    g.appendChild(el('circle', { class: 'node-aura', r: d.r + 11 * sc }));
     g.appendChild(el('circle', { class: 'ring', r: d.r }));
     if (d.growth && d.growth !== 'impulse') g.appendChild(el('circle', { class: `halo halo-${d.growth}`, r: d.r + 5 * sc }));
     g.appendChild(el('circle', { class: 'dot', r: d.r }));

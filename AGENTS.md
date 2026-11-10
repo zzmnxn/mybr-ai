@@ -20,6 +20,14 @@ One `notes` collection (Astro Content Collections + Zod), Markdown files in `src
 - Optional fields are valid only for their `kind`; reject others instead of ignoring them.
 - Cross-document checks (duplicate uid/permalink, dangling references) run in a separate script before build.
 
+## Planned notes (앞으로 쓸 글)
+
+- A topic promised in a note but not yet written goes in `src/data/planned.yaml` (`planned` collection). Schema: `id` (`plan-` + kebab-case), `title`, `section`, `domains`, `near` (existing note `uid`s or other plan ids). The file is public: add only topics that are fine to publish, and no drafts or private notes.
+- Planned notes are not relations: never put a plan id in `related`, `prerequisites`, or `projectRefs` (`scripts/verify-content.mjs` rejects it).
+- To link to a planned topic from a note body, use a relative path from the note page: `[text](../../topics/<plan-id>)`. Do not use root-relative paths like `/topics/...`, because the site `base` is `/mybr-ai`.
+- Do not write a note's content just because a plan exists; a plan is a placeholder with no claims.
+- When the planned note is actually written, create it in `src/content/notes/` with a new `uid`, remove its `planned.yaml` entry, and repoint body links from `../../topics/<plan-id>` to `../<permalink>`. Then run `npm run build`.
+
 ## Truthfulness and privacy
 
 - Never invent first-hand experience, tests, tools used, dates, metrics, or project contributions. Distinguish designed / implemented / verified / published.
