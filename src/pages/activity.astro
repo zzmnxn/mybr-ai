@@ -1,0 +1,8 @@
+---
+import Shell from '../layouts/Shell.astro';
+import ActivityCalendar from '../components/ActivityCalendar.astro';
+import { getActivityData } from '../lib/activity-data';
+import { seoulToday } from '../lib/activity-calendar';
+const data = await getActivityData();
+---
+<Shell title="Activity" view="activity" active="activity"><ActivityCalendar data={data} month={seoulToday().slice(0, 7)} /></Shell>

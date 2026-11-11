@@ -114,7 +114,37 @@ const planned = z
   })
   .strict();
 
+const pinned = z.object({ id: z.string().regex(/^pin-[a-z0-9]+(-[a-z0-9]+)*$/), noteUid: z.string().min(1) }).strict();
+
+const path = z.object({
+  id: z.string().regex(/^path-[a-z0-9]+(-[a-z0-9]+)*$/),
+  title: z.string().trim().min(1), summary: z.string().trim().min(1),
+  publishedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  steps: z.array(z.object({
+    id: z.string().regex(/^step-[a-z0-9]+(-[a-z0-9]+)*$/),
+    title: z.string().trim().min(1), description: z.string().trim().min(1),
+    noteUids: z.array(z.string()),
+  }).strict()).min(1),
+}).strict();
+
+const activityCommon = {
+  id: z.string().regex(/^act-[a-z0-9]+(-[a-z0-9]+)*$/),
+  on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  visibility: z.literal('public').default('public'),
+  detail: z.string().max(280).regex(/^[^\r\n\x00-\x1f]*$/).optional(),
+};
+const activity = z.discriminatedUnion('kind', [
+  z.object({ ...activityCommon, kind: z.literal('path-create'), pathId: z.string() }).strict(),
+  z.object({ ...activityCommon, kind: z.literal('path-update'), pathId: z.string() }).strict(),
+  z.object({ ...activityCommon, kind: z.literal('revise'), noteUid: z.string(), evidenceKey: z.string().trim().min(1).optional() }).strict(),
+  z.object({ ...activityCommon, kind: z.literal('review'), noteUid: z.string() }).strict(),
+  z.object({ ...activityCommon, kind: z.literal('link'), fromUid: z.string(), toUid: z.string(), relation: z.enum(RELATIONS) }).strict(),
+]);
+
 export const collections = {
+  paths: defineCollection({ loader: file('src/data/paths.yaml'), schema: path }),
+  activities: defineCollection({ loader: file('src/data/activities.yaml'), schema: activity }),
   notes: defineCollection({ loader: glob({ pattern: '**/*.md', base: './src/content/notes' }), schema: note }),
+  pinned: defineCollection({ loader: file('src/data/pinned.yaml'), schema: pinned }),
   planned: defineCollection({ loader: file('src/data/planned.yaml'), schema: planned }),
 };

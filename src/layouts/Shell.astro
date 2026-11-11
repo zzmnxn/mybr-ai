@@ -4,13 +4,14 @@ import Sidebar from '../components/Sidebar.astro';
 import { url, type SectionKey } from '../lib/site';
 import '../styles/tokens.css';
 import '../styles/global.css';
+import '../styles/effects.css';
 import themeScript from '../scripts/theme.js?raw';
 
 interface Props {
   title?: string;
   description?: string;
-  view: 'map' | 'list' | 'note' | 'about';
-  active?: SectionKey | 'all';
+  view: 'map' | 'list' | 'note' | 'about' | 'activity' | 'paths' | 'history';
+  active?: SectionKey | 'all' | 'activity' | 'paths' | 'history';
   section?: SectionKey;
   focus?: string;
 }
@@ -39,6 +40,14 @@ const pageTitle = title ? `${title} | mybr.ai` : 'mybr.ai';
           var r = document.documentElement;
           r.classList.add('js');
           try { r.toggleAttribute('data-fold', JSON.parse(localStorage.getItem('mybr-fold')) === true); } catch (e) {}
+          try {
+            var w = JSON.parse(localStorage.getItem('mybr-pane-w'));
+            if (w >= 240 && w <= 560) r.style.setProperty('--pane-w', w + 'px'); else r.style.removeProperty('--pane-w');
+          } catch (e) {}
+          try {
+            var h = JSON.parse(localStorage.getItem('mybr-history-h'));
+            if (h >= 160 && h <= innerHeight - 200) r.style.setProperty('--history-h', h + 'px'); else r.style.removeProperty('--history-h');
+          } catch (e) {}
         }
         apply();
         document.addEventListener('astro:after-swap', apply);
@@ -73,7 +82,8 @@ const pageTitle = title ? `${title} | mybr.ai` : 'mybr.ai';
           </div>
           <svg id="threads" aria-hidden="true"></svg>
         </div>
-        {view !== 'map' && (
+        {view === 'history' && <main class="history-panel" data-view="history"><slot /></main>}
+        {view !== 'map' && view !== 'history' && (
           <>
             <div class="progress" aria-hidden="true"></div>
             <main class="reader" data-view={view} data-section={section} data-focus={focus}>

@@ -1,0 +1,57 @@
+/* Paths: 번호가 큰 단계, 왼쪽을 잇는 선, 글 카드 */
+.reader[data-view="paths"] { background-image: var(--grid-dot); background-attachment: local; }
+.reader[data-view="paths"] h1 + .note-sum { font-size: var(--text-lead); line-height: 1.6; }
+.path-position { margin-top: 12px; color: var(--color-muted); font-size: .875rem; font-variant-numeric: tabular-nums; }
+
+/* 목록 */
+.path-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0; margin: 10px 0 0; padding: 0; list-style: none; font-size: .8125rem; color: var(--color-ink-2); }
+.path-chain li { display: inline-flex; align-items: center; }
+.path-chain li::before { content: ""; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--color-trail); box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 3px color-mix(in srgb, var(--color-trail) 40%, transparent); }
+.path-chain li + li { margin-left: 8px; }
+.path-chain li:not(:last-child)::after { content: ""; width: 12px; height: 1px; margin-left: 10px; background: var(--color-rule); }
+.entry-path a { grid-template-columns: 40px minmax(0, 1fr); padding: 20px 18px; border: 1px solid var(--color-rule); border-radius: 18px; background: var(--color-paper); box-shadow: 0 1px 0 color-mix(in srgb, var(--color-ink) 5%, transparent); }
+.entry-path a:hover { border-color: var(--color-trail); box-shadow: 0 6px 0 color-mix(in srgb, var(--color-marker) 55%, transparent), 0 24px 44px -30px color-mix(in srgb, var(--color-ink) 40%, transparent); background: var(--color-paper); }
+.path-glyph { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--color-rule); border-radius: 12px; color: var(--color-trail); background: var(--color-paper-2); transition: transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color var(--dur-short) var(--ease-out); }
+.entry-path a:hover .path-glyph { transform: rotate(-8deg) scale(1.08); border-color: var(--color-trail); }
+.entry-path .e-meta { font-variant-numeric: tabular-nums; }
+
+/* 전체 단계 */
+.path-overview { margin-block: 28px 8px; padding: 18px 20px; border: 1px solid var(--color-rule); border-radius: 16px; background: var(--color-paper); box-shadow: 0 1px 0 color-mix(in srgb, var(--color-ink) 5%, transparent); }
+.path-overview::before { content: "전체 단계"; display: block; margin-bottom: 8px; color: var(--color-muted); font-size: .8125rem; }
+.path-overview ol { margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-wrap: wrap; gap: 6px 4px; }
+.path-overview li { counter-increment: step; display: inline-flex; align-items: center; }
+.path-overview li:not(:last-child)::after { content: ""; width: 18px; height: 1px; margin-inline: 4px; background: var(--color-rule); }
+.path-overview a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 6px; border: 1px solid var(--color-rule); border-radius: var(--radius-pill); color: var(--color-ink); text-decoration: none; font-size: .9375rem; transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out); }
+.path-overview a::before { content: counter(step); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--color-paper-2); color: var(--color-muted); font-family: var(--font-code); font-size: .75rem; }
+.path-overview a:hover { border-color: var(--color-trail); transform: translateY(-2px); }
+.path-overview [aria-current] { color: var(--color-trail); border-color: var(--color-trail); background: var(--color-marker); text-decoration: none; }
+.path-overview [aria-current]::before { background: var(--color-trail); color: var(--color-paper); }
+
+/* 단계 */
+.path-steps { list-style: none; margin: 16px 0 0; padding: 0 0 0 56px; position: relative; counter-reset: step; }
+.path-steps::before { content: ""; position: absolute; left: 19px; top: 24px; bottom: 24px; width: 2px; background: var(--color-rule); }
+.path-steps > li { position: relative; counter-increment: step; padding: 28px 0 44px; border-bottom: 0; }
+.path-steps > li::before { content: counter(step, decimal-leading-zero); position: absolute; right: 0; top: 12px; font-family: var(--font-code); font-size: 5.5rem; line-height: 1; letter-spacing: -0.04em; color: var(--color-ink); opacity: .06; pointer-events: none; user-select: none; }
+.path-steps > li::after { content: counter(step); position: absolute; left: -56px; top: 30px; display: grid; place-items: center; width: 40px; height: 40px; border: 2px solid var(--color-trail); border-radius: 50%; background: var(--color-paper); color: var(--color-trail); font-family: var(--font-code); font-size: .9375rem; box-shadow: 0 0 0 6px var(--color-paper); transition: transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
+.path-steps > li:hover::after, .path-steps > li:target::after { background: var(--color-trail); color: var(--color-paper); transform: scale(1.1); }
+.path-steps > li:target h2 { color: var(--color-trail); }
+.path-steps h2 { max-width: none; font-size: 1.5rem; line-height: 1.4; }
+.path-steps h2 + p { margin-block: 12px 20px; line-height: 1.9; color: var(--color-ink-2); max-width: 60ch; }
+.path-steps .path-position { display: none; }
+.path-notes { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.path-notes a { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 56px; padding: 10px 16px; border: 1px solid var(--color-rule); border-radius: 14px; background: var(--color-paper); color: var(--color-ink); text-decoration: none; box-shadow: 0 1px 0 color-mix(in srgb, var(--color-ink) 5%, transparent); transition: border-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out); }
+.path-notes a:hover { border-color: var(--color-trail); transform: translateX(4px); box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--color-ink) 40%, transparent); }
+.path-notes .gdot { justify-self: center; }
+.path-notes small { color: var(--color-muted); padding: 2px 10px; border: 1px solid var(--color-rule); border-radius: var(--radius-pill); font-size: .75rem; white-space: nowrap; }
+.path-steps .note-nav { margin-top: 20px; gap: 8px; }
+.path-steps .note-nav a { min-height: 40px; padding: 0 14px; border: 1px solid var(--color-rule); border-radius: var(--radius-pill); color: var(--color-ink-2); text-decoration: none; font-size: .875rem; transition: border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out); }
+.path-steps .note-nav a:hover { border-color: var(--color-trail); color: var(--color-trail); transform: translateY(-2px); }
+@media (max-width: 40rem) {
+  .path-steps { padding-left: 44px; }
+  .path-steps::before { left: 15px; }
+  .path-steps > li::after { left: -44px; width: 32px; height: 32px; font-size: .8125rem; }
+  .path-steps > li::before { font-size: 3.5rem; }
+  .path-notes a { grid-template-columns: 24px minmax(0, 1fr); }
+  .path-notes small { grid-column: 2; justify-self: start; }
+  .entry-path a { padding: 16px 14px; }
+}

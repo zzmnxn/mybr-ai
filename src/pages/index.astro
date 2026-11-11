@@ -1,13 +1,28 @@
 ---
 import GrowthDot from '../components/GrowthDot.astro';
 import Shell from '../layouts/Shell.astro';
+import { getCollection } from 'astro:content';
 import { getNotes, noteUrl } from '../lib/graph';
 import { month } from '../lib/site';
-const recent = (await getNotes()).slice(0, 3);
+const all = await getNotes();
+const byUid = new Map(all.map((n) => [n.data.uid, n]));
+const pins = (await getCollection('pinned')).flatMap((p) => byUid.get(p.data.noteUid) ?? []);
+const pinned = new Set(pins.map((n) => n.data.uid));
+const recent = all.filter((n) => !pinned.has(n.data.uid)).slice(0, 3);
 ---
 <Shell view="map">
   <h1 class="visually-hidden">mybr.ai</h1>
-  <section class="recent" aria-label="최근 글">
+  <section class="recent" aria-label="고정 글과 최근 글">
+    {pins.length > 0 && <>
+      <h2>고정 글</h2>
+      <ul class="pinned">
+        {pins.map((n) => (
+          <li class="row" data-row={n.data.uid} data-written="1">
+            <a href={noteUrl(n)}><GrowthDot growth={n.data.growth} /><span>{n.data.title}<small>{month(n.data.publishedAt)}</small></span></a>
+          </li>
+        ))}
+      </ul>
+    </>}
     <h2>최근 글</h2>
     {recent.length === 0 && <p class="hand">아직 쓴 글이 없어요</p>}
     <ul>

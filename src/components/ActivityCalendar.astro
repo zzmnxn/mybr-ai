@@ -1,0 +1,62 @@
+---
+import Close from './Close.astro';
+import ActivitySymbol from './ActivitySymbol.astro';
+import ActivityList from './ActivityList.astro';
+import { groupActivitiesByDay } from '../lib/activity';
+import { daysInMonth, seoulToday, type ActivityPayload } from '../lib/activity-calendar';
+import { url } from '../lib/site';
+import '../styles/activity.css';
+interface Props { data: ActivityPayload; month: string; pathMonth?: string }
+const { data, month, pathMonth } = Astro.props;
+const grouped = groupActivitiesByDay(data.events);
+const months = [...new Set([...data.events.map(e => e.day.slice(0, 7)), seoulToday().slice(0, 7)])].sort().reverse();
+const days = Array.from({ length: daysInMonth(month) }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`);
+---
+<article class="activity" data-activity data-month={month} data-path-month={pathMonth} data-endpoint={url('/activity.json')} data-canonical={url('/activity')}>
+  <Close />
+  <header class="activity-header">
+    <p class="hand">내 활동을 네트워크로 보기</p><h1 tabindex="-1">Activity</h1>
+    <p class="activity-muted">글 발행, 수정, 복습, 연결 같은 공개 활동을 하나의 네트워크로 시각화한 달력입니다.</p>
+  </header>
+  <div class="activity-interactive" hidden>
+    <div class="activity-toolbar">
+      <div class="activity-month-nav"><button type="button" class="round" data-month-shift="-1" aria-label="이전 월">‹</button><h2 class="activity-month-title" data-month-title>{month.replace('-', '년 ')}월</h2><button type="button" class="round" data-month-shift="1" aria-label="다음 월">›</button></div>
+      <label class="activity-month-pick"><span>월 직접 선택</span><input type="month" data-month-input min="0001-01" max="9999-12" value={month} /></label>
+      <button type="button" data-list-toggle aria-pressed="false">목록 보기</button>
+    </div>
+    <p class="activity-notice" data-activity-notice role="status"></p>
+    <div class="activity-columns">
+      <section class="activity-map-panel" aria-label="날짜별 활동">
+        <p data-month-empty class="activity-muted" hidden>이 달의 공개 기록이 아직 없습니다</p>
+        <div class="activity-map" data-activity-map><svg data-activity-curve aria-hidden="true" focusable="false"><path class="turn" /><path class="ribbon" /><path class="line" /></svg><ol data-activity-days></ol></div>
+        <p class="activity-caption">날짜를 잇는 선은 시간의 흐름입니다.</p>
+      </section>
+      <div class="activity-side">
+        <section class="activity-detail" aria-labelledby="activity-selected-title">
+          <div class="activity-date-heading"><span data-detail-symbol></span><h2 id="activity-selected-title" data-detail-title></h2><span class="activity-pill" data-detail-count></span></div>
+          <p data-detail-empty></p><ul data-detail-events class="activity-events"></ul>
+          <p class="activity-note">날짜의 심볼은 그날의 활동 개수를 요약한 것이며, 활동의 종류를 나타내지 않습니다.</p>
+        </section>
+        <section class="activity-legend-box" aria-labelledby="activity-legend-title">
+          <h3 id="activity-legend-title">활동 수에 따른 표시 방법</h3>
+          <ul class="activity-legend">{[0, 1, 2, 3, 4, 5].map(count => <li><ActivitySymbol count={count} /><span>{count === 5 ? '5개 이상' : `${count}개`}</span>{count === 0 && <small>(활동 없음)</small>}</li>)}</ul>
+        </section>
+        <section class="activity-summary" aria-labelledby="activity-summary-title">
+          <h3 id="activity-summary-title">이번 달의 활동 네트워크</h3>
+          <p class="activity-muted">점은 활동한 날, 크기는 활동 수, 선은 날짜 순서입니다.</p>
+          <svg class="activity-network" data-month-network viewBox="0 0 280 170" role="img" aria-label=""></svg>
+          <dl><div><dt>총 활동</dt><dd data-month-total></dd></div><div><dt>활동한 날</dt><dd data-month-days></dd></div><div><dt>가장 많은 날</dt><dd data-month-peak></dd></div></dl>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div data-activity-error hidden role="alert"><p>활동 기록을 불러오지 못했습니다. 아래 월별 목록에서 글을 읽을 수 있습니다.</p><button type="button" data-activity-retry>다시 시도</button></div>
+  <div data-activity-fallback>
+    <h2 class="activity-fallback-title">{month.replace('-', '년 ')}월 기록</h2>
+    <p class="activity-muted">빌드 시점 기준 월별 목록입니다.</p>
+    <div class="activity-fallback-days">{days.map(day => <ActivityList day={day} events={grouped.get(day) ?? []} notes={data.notes} paths={data.paths} />)}</div>
+  </div>
+  <nav class="activity-archive" aria-label="월별 기록"><h2>월별 목록</h2><ul>{months.map(m => <li><a href={url(`/activity/${m}/`)}>{m.replace('-', '.')}</a></li>)}</ul></nav>
+  {[0, 1, 2, 3, 4, 5].map(count => <template data-activity-symbol={count}><ActivitySymbol count={count} /></template>)}
+  <template data-activity-item><li><p class="activity-event-meta" data-event-meta></p><div class="activity-event-links" data-event-links></div><p data-event-detail hidden></p></li></template>
+</article>

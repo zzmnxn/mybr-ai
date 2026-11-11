@@ -10,7 +10,7 @@
   --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
   --color-paper: #FCFDFD; --color-paper-2: #F3F5F5; --color-paper-3: #ECEFEF;
   --color-ink: #111416; --color-ink-2: #3D4245; --color-muted: #666B6E;
-  --color-rule: #DEE1E3;
+  --color-rule: #C3C8CB; --edge-alpha: 0.6;
   --color-accent: var(--color-ink); --color-accent-ink: var(--color-paper); --color-focus: var(--color-ink);
   --font-display: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif; --font-body: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif; --font-outlier: "Nanum Pen Script", "Gowun Dodum", cursive;
   --radius-card: 4px; --radius-pill: 999px; --rule-hair: 1px; --shadow-card: none;
@@ -28,7 +28,7 @@
   color-scheme: dark;
   --color-paper: #151515; --color-paper-2: #202020; --color-paper-3: #2A2A2A;
   --color-ink: #F2F2F2; --color-ink-2: #CCCCCC; --color-muted: #AAAAAA;
-  --color-rule: #3D3D3D; --color-marker: #273751; --color-trail: #8DAADE;
+  --color-rule: #5A5A5A; --edge-alpha: 0.65; --color-marker: #273751; --color-trail: #8DAADE;
 }
 /* Keep system dark mode available even without JavaScript. */
 @media (prefers-color-scheme: dark) {
@@ -36,6 +36,6 @@
     color-scheme: dark;
     --color-paper: #151515; --color-paper-2: #202020; --color-paper-3: #2A2A2A;
     --color-ink: #F2F2F2; --color-ink-2: #CCCCCC; --color-muted: #AAAAAA;
-    --color-rule: #3D3D3D; --color-marker: #273751; --color-trail: #8DAADE;
+    --color-rule: #5A5A5A; --edge-alpha: 0.65; --color-marker: #273751; --color-trail: #8DAADE;
   }
 }

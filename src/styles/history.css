@@ -1,0 +1,82 @@
+.app:has([data-view="history"]) { --history-panel-height: var(--history-h, clamp(300px, 42dvh, 480px)); }
+.app:has([data-view="history"]) .brainbox { bottom: var(--history-panel-height); }
+.app:has([data-view="history"]) .tools { display: flex; }
+.history-panel { position: absolute; z-index: var(--z-raised); inset: auto 0 0; height: var(--history-panel-height); overflow-y: auto; background: var(--color-paper); border-top: 1px solid var(--color-rule); padding: 16px 32px 32px; }
+.history-content h1 { font-size: 1.75rem; line-height: 1.5; }
+.history-content h1:focus { outline: none; }
+.history-content header { display: flex; align-items: baseline; gap: 24px; margin-top: 8px; }
+.history-content header p { max-width: 70ch; color: var(--color-muted); font-size: .875rem; line-height: 1.7; }
+.history-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-block: 16px; }
+.history-controls label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.history-content button, .history-content input { min-height: 44px; color: var(--color-ink); background: var(--color-paper); border: 1px solid var(--color-rule); border-radius: 6px; padding: 6px 12px; }
+.history-content button { cursor: pointer; }
+.history-content button:disabled { opacity: .4; cursor: default; }
+.history-content h2 { font-size: 1.125rem; line-height: 1.5; margin-top: 16px; }
+.history-content li { margin-block: 8px; line-height: 1.8; }
+.history-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+[data-history-status] { color: var(--color-muted); font-size: .875rem; }
+[data-history-comparison] { margin-top: 8px; }
+@media (max-width: 56rem) {
+ .app:has([data-view="history"]) { --history-panel-height: var(--history-h, 50dvh); }
+ .app:has([data-view="history"]) .stage { height: 100dvh; }
+ .app:has([data-view="history"]) .pane { display: none; }
+ .history-panel { padding-inline: 16px; }
+ .history-content header { display: block; }
+ .history-content header p { margin-top: 8px; }
+ .history-lists { grid-template-columns: 1fr; gap: 0; }
+}
+:root:not(.js) .app:has([data-view="history"]) .brainbox { display: none; }
+:root:not(.js) .history-panel { position: static; height: auto; }
+:root:not(.js) .app:has([data-view="history"]), :root:not(.js) .app:has([data-view="history"]) .stage { height: auto; overflow: visible; }
+
+/* ── 디테일: 위쪽 그래프는 모눈 위에, 아래 패널은 종이처럼 ───────────── */
+.app:has([data-view="history"]) .stage { background-image: var(--grid-dot), var(--grid-line); }
+.app:has([data-view="history"]) .brainbox::after { content: "과거의 연결"; position: absolute; left: var(--space-md); top: var(--space-md); padding: 4px 12px; border: 1px solid var(--color-rule); border-radius: var(--radius-pill); background: var(--color-paper); color: var(--color-muted); font-family: var(--font-outlier); font-size: 1.25rem; line-height: 1.3; pointer-events: none; }
+[data-fold] .app:has([data-view="history"]) .brainbox::after { left: 150px; }
+/* 글 점만 남은 시간 그래프는 확대 배율이 커서 제목이 겹친다. 가리킨 점만 제목을 보인다 */
+.app:has([data-view="history"]) .zoomed .n text { opacity: 0; }
+.app:has([data-view="history"]) .n:hover text, .app:has([data-view="history"]) .n:focus-visible text, .app:has([data-view="history"]) .n.lit text { opacity: 1; }
+.app:has([data-view="history"]) .n text { font-size: 11px; }
+.history-panel { padding: 0 32px 40px; border-top: 0; box-shadow: 0 -1px 0 var(--color-rule), 0 -24px 48px -32px color-mix(in srgb, var(--color-ink) 35%, transparent); }
+.history-content { padding-top: 14px; }
+.history-content .note-nav .close { font-size: 1.375rem; }
+.history-content header { align-items: baseline; gap: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--color-rule); }
+.history-content h1 { position: relative; font-size: 2rem; }
+.history-content h1::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 2.5rem; height: 3px; border-radius: var(--radius-pill); background: var(--color-trail); }
+.history-controls { gap: 10px; padding: 10px 12px; border: 1px solid var(--color-rule); border-radius: 14px; background: var(--color-paper); box-shadow: 0 1px 0 color-mix(in srgb, var(--color-ink) 5%, transparent); }
+.history-controls label { color: var(--color-muted); font-size: .875rem; }
+.history-content button { transition: border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out); }
+.history-content button:hover:not(:disabled) { border-color: var(--color-trail); color: var(--color-trail); transform: translateY(-1px); }
+.history-content button[type="submit"] { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+.history-content button[type="submit"]:hover { background: var(--color-trail); border-color: var(--color-trail); color: var(--color-paper); }
+.history-content input[type="date"] { font-variant-numeric: tabular-nums; }
+[data-history-status] { margin-top: 10px; }
+[data-history-count] { font-size: 1.125rem; }
+[data-history-comparison] { display: inline-block; margin-top: 8px; padding: 3px 12px; border-radius: var(--radius-pill); background: var(--color-marker); color: var(--color-ink); font-size: .8125rem; }
+.history-lists { margin-top: 16px; }
+.history-lists section { padding: 16px 20px 20px; border: 1px solid var(--color-rule); border-radius: 16px; background: var(--color-paper); background-image: var(--grid-dot); }
+.history-lists h2 { margin-top: 0; display: flex; align-items: center; gap: 10px; }
+.history-lists h2::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--color-trail); }
+.history-lists ul, [data-history-fallback] ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.history-lists li, [data-history-fallback] li { position: relative; margin: 0; padding: 6px 0 6px 20px; }
+.history-lists li::before, [data-history-fallback] li::before { content: ""; position: absolute; left: 0; top: 1.05em; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--color-trail); background: var(--color-paper); }
+.history-lists a, [data-history-fallback] a { text-decoration-color: var(--color-trail); text-decoration-thickness: 2px; text-underline-offset: .2em; transition: color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out); }
+.history-lists a:hover, [data-history-fallback] a:hover { color: var(--color-trail); background: color-mix(in srgb, var(--color-marker) 40%, transparent); }
+[data-history-fallback] { margin-top: 16px; padding: 16px 20px 20px; border: 1px solid var(--color-rule); border-radius: 16px; background: var(--color-paper); }
+[data-history-fallback] time { margin-right: 8px; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--color-paper-2); color: var(--color-muted); font-size: .8125rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 56rem) {
+  .history-panel { padding: 0 16px 32px; }
+  .history-resize { margin-inline: -16px; }
+  .app:has([data-view="history"]) .brainbox::after { left: var(--space-md); top: var(--space-md); }
+  .history-lists section { margin-bottom: 12px; }
+}
+
+/* 패널 높이 조절 손잡이: 위쪽 파란 띠를 잡고 끈다 */
+.history-resize { position: sticky; top: 0; z-index: 2; display: grid; place-items: center; height: 22px; margin: 0 -32px; cursor: row-resize; touch-action: none; user-select: none; background: var(--color-paper); box-shadow: inset 0 4px 0 var(--color-trail); transition: box-shadow var(--dur-short) var(--ease-out); }
+.history-grip { width: 48px; height: 5px; margin-top: 4px; border-radius: var(--radius-pill); background: var(--color-rule); transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out); }
+.history-resize:hover .history-grip, .history-resize:focus-visible .history-grip, .history-resizing .history-grip { background: var(--color-trail); transform: scaleX(1.25); }
+.history-resize:hover, .history-resizing .history-resize { box-shadow: inset 0 6px 0 var(--color-trail); }
+.history-resize:focus-visible { outline: none; box-shadow: inset 0 6px 0 var(--color-trail), inset 0 0 0 2px var(--color-focus); }
+.history-resizing, .history-resizing * { cursor: row-resize !important; }
+.history-resizing .history-panel, .history-resizing .brainbox { transition: none; }
+@media (pointer: coarse) { .history-resize { height: 28px; } .history-grip { width: 64px; height: 6px; } }

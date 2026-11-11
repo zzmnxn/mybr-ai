@@ -1,12 +1,13 @@
 ---
 import Filters from './Filters.astro';
-import { getNotes } from '../lib/graph';
+import NavIcon from './NavIcon.astro';
+import { getNotes, noteUrl } from '../lib/graph';
 import { SECTIONS, url, type SectionKey } from '../lib/site';
-interface Props { active?: SectionKey | 'all'; }
+interface Props { active?: SectionKey | 'all' | 'activity' | 'paths' | 'history'; }
 const { active } = Astro.props;
 const notes = await getNotes();
 const count = (s: SectionKey) => notes.filter((n) => n.data.section === s).length;
-const section = active && active !== 'all' ? active : undefined;
+const section = active && active !== 'all' && active !== 'activity' && active !== 'paths' && active !== 'history' ? active : undefined;
 ---
 <aside class="pane" aria-label="사이드바">
   <div class="head-row">
@@ -15,15 +16,18 @@ const section = active && active !== 'all' ? active : undefined;
   </div>
   <nav aria-label="분류">
     <ul class="cats">
-      <li><a class="cat" href={url('/notes')} aria-current={active === 'all' ? 'page' : undefined}>전체 글 <span>{notes.length}</span></a></li>
+      <li><a class="cat" href={url('/notes')} aria-current={active === 'all' ? 'page' : undefined}><span class="cat-label"><NavIcon name="all" />전체 글</span> <span>{notes.length}</span></a></li>
       {(Object.keys(SECTIONS) as SectionKey[]).map((s) => (
-        <li><a class="cat" data-section={s} href={url(SECTIONS[s].path)} aria-current={active === s ? 'page' : undefined}>{SECTIONS[s].label} <span>{count(s)}</span></a></li>
+        <li><a class="cat" data-section={s} href={url(SECTIONS[s].path)} aria-current={active === s ? 'page' : undefined}><span class="cat-label"><NavIcon name={s} />{SECTIONS[s].label}</span> <span>{count(s)}</span></a></li>
       ))}
     </ul>
   </nav>
+  <nav aria-label="기능" class="features"><h2>기능</h2><a class="cat" href={url('/activity')} aria-current={active === 'activity' ? 'page' : undefined}><span class="cat-label"><NavIcon name="activity" />Activity</span></a><a class="cat" href={url('/paths/')} aria-current={active === 'paths' ? 'page' : undefined}><span class="cat-label"><NavIcon name="paths" />Paths</span></a><a class="cat" href={url('/history')} aria-current={active === 'history' ? 'page' : undefined}><span class="cat-label"><NavIcon name="history" />History</span></a></nav>
+  <nav aria-label="즐겨찾기" class="features favorites" data-favorites data-notes={JSON.stringify(notes.map((n) => ({ uid: n.data.uid, title: n.data.title, url: noteUrl(n) })))} hidden><h2>즐겨찾기</h2><ul data-favorites-list></ul></nav>
   <div class="filter-home"><Filters section={section} /></div>
   <div class="pane-foot">
     <a href={url('/about')}>About</a>
     <button class="trail-clear" type="button" hidden>내 길 지우기</button>
   </div>
+  <div class="pane-resize" role="separator" aria-orientation="vertical" aria-label="사이드바 너비 조절 (좌우 방향키, 더블클릭으로 초기화)" aria-valuemin="240" aria-valuemax="560" aria-valuenow="300" tabindex="0"></div>
 </aside>

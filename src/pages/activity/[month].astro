@@ -1,0 +1,14 @@
+---
+import Shell from '../../layouts/Shell.astro';
+import ActivityCalendar from '../../components/ActivityCalendar.astro';
+import { getActivityData } from '../../lib/activity-data';
+import { seoulToday } from '../../lib/activity-calendar';
+export async function getStaticPaths() {
+  const data = await getActivityData();
+  const months = [...new Set([...data.events.map(e => e.day.slice(0, 7)), seoulToday().slice(0, 7)])];
+  return months.map(month => ({ params: { month }, props: { data } }));
+}
+const { data } = Astro.props;
+const month = Astro.params.month!;
+---
+<Shell title={`${month} Activity`} view="activity" active="activity"><ActivityCalendar data={data} month={month} pathMonth={month} /></Shell>

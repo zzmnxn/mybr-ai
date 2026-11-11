@@ -1,0 +1,18 @@
+---
+import type { KnowledgePath } from '../lib/paths';
+import { getNotes, noteUrl } from '../lib/graph';
+import GrowthDot from './GrowthDot.astro';
+import { GROWTH } from '../lib/site';
+interface Props { path: KnowledgePath }
+const { path } = Astro.props;
+const notes = new Map((await getNotes()).map(note => [note.data.uid, note]));
+---
+<nav class="path-overview" aria-label="전체 단계"><ol>{path.steps.map(step => <li><a href={`#${step.id}`} data-path-anchor={step.id}>{step.title}</a></li>)}</ol></nav>
+<ol class="path-steps" data-path-steps>{path.steps.map((step, index) => <li id={step.id} data-path-step data-note-uids={JSON.stringify(step.noteUids)}>
+  <p class="path-position">{index + 1} / {path.steps.length}</p><h2>{step.title}</h2><p>{step.description}</p>
+  <ul class="path-notes">{step.noteUids.map(uid => { const note = notes.get(uid)!; return <li><a href={noteUrl(note)} data-row-hover={uid}><GrowthDot growth={note.data.growth} />{note.data.title} <small>{GROWTH[note.data.growth]}</small></a></li>; })}</ul>
+  <nav class="note-nav" aria-label={`${step.title} 단계 이동`}>
+    {index > 0 && <a href={`#${path.steps[index - 1].id}`}>이전 단계</a>}
+    {index + 1 < path.steps.length && <a href={`#${path.steps[index + 1].id}`}>다음 단계</a>}
+  </nav>
+</li>)}</ol>

@@ -1,0 +1,5 @@
+<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  
+  
+  <g><polyline points="15,29 33,19" fill="none" stroke="var(--activity-node, #7691C7)" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" /><circle cx="15" cy="29" r="3.75" fill="var(--color-paper, white)" stroke="var(--activity-node, #627DB9)" stroke-width="2.2" /><circle cx="33" cy="19" r="3.75" fill="var(--color-paper, white)" stroke="var(--activity-node, #627DB9)" stroke-width="2.2" /></g>
+</svg>

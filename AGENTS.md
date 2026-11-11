@@ -34,6 +34,15 @@ One `notes` collection (Astro Content Collections + Zod), Markdown files in `src
 - Only approved public Markdown is committed. No private notes, drafts, Tistory originals, company/customer information, credentials, or sensitive prompts. Check images for EXIF and licensing.
 - Do not reference local-only paths (e.g. `docs/`) from committed files.
 
+## Activity log (`src/data/activities.yaml`)
+
+- Add entries only when the user explicitly asks. Never add them on your own judgment.
+- Use only the `uid` of notes actually handled in this session. If unsure, ask first. Never invent study or edits.
+- kind: `review` if the user studied the note again, `revise` if the note's content was changed. `on` is today's date in Seoul time (`YYYY-MM-DD`).
+- `detail` is optional: one public-safe plain-text line (≤280 chars). No prompts, private content, or local-only paths.
+- Do not add a `review` for a note and date that already has one. Run `npm run verify` after adding. Commit only when asked.
+- Publish activities are generated from `publishedAt`; never add them by hand. Field rules are in `CONTENT_GUIDE.md` §9.
+
 ## Design
 
 Calm, precise, editorial; Korean long-form readability first. The approved design lives in `DESIGN.md` — follow it over any generic style. Avoid generic AI-SaaS layouts, purple/neon gradients, glass blur, repeated identical cards, giant brain art, auto-rotating 3D, decorative animation. Respect `prefers-reduced-motion`; semantic HTML; keyboard focus visible; verify at 1440 / 768 / 390px.

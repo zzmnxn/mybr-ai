@@ -1,0 +1,23 @@
+---
+import { getActivityData } from '../lib/activity-data';
+import { getNotes, noteUrl } from '../lib/graph';
+import { dateLabel, seoulToday } from '../lib/activity-calendar';
+import { url } from '../lib/site';
+const data = await getActivityData();
+const published = new Map(data.events.filter(e => e.kind === 'publish').map(e => [e.noteUids[0], e.day]));
+const notes = (await getNotes()).sort((a,b) => published.get(a.data.uid)!.localeCompare(published.get(b.data.uid)!) || a.data.uid.localeCompare(b.data.uid));
+---
+<div class="history-resize" role="separator" aria-orientation="horizontal" aria-label="패널 높이 조절 (위아래 방향키, 더블클릭으로 초기화)" aria-valuemin="160" tabindex="0" data-history-resize><span class="history-grip" aria-hidden="true"></span></div>
+<article class="history-content" data-history data-endpoint={url('/history.json')}>
+  <div class="note-nav"><a class="close" href={url('/')}>현재 연결 보기</a></div>
+  <header><h1 tabindex="-1">History</h1><p>기재된 발행일 기준 누적입니다. 현재 제목과 글 링크를 사용하며, 과거 관계·본문·성장 단계는 복원하지 않습니다.</p></header>
+  <form data-history-form hidden class="history-controls">
+    <button type="button" data-history-previous>이전 발행일</button>
+    <label>기준 날짜 <input type="date" data-history-day min="0001-01-01" max={seoulToday()} value={seoulToday()} /></label>
+    <button type="submit">보기</button><button type="button" data-history-next>다음 발행일</button>
+  </form>
+  <p data-history-status role="status"></p>
+  <div data-history-result hidden><p data-history-count></p><p data-history-comparison></p><div class="history-lists"><section><h2>선택일의 글</h2><ul data-history-selected></ul></section><section><h2>오늘과 비교</h2><p data-history-missing-count></p><ul data-history-missing></ul></section></div></div>
+  <div data-history-error hidden><p>시간 기록을 불러오지 못했습니다. 아래 발행일 목록에서 글을 읽을 수 있습니다.</p><button type="button" data-history-retry>다시 시도</button></div>
+  <section data-history-fallback><h2>발행일순 현재 글</h2><ul>{notes.map(note => <li><time>{dateLabel(published.get(note.data.uid)!)}</time> <a href={noteUrl(note)}>{note.data.title}</a></li>)}</ul></section>
+</article>

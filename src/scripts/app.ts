@@ -1,6 +1,9 @@
 import { navigate } from 'astro:transitions/client';
 import { createBrain, type Brain, type Kind, type NodeInput } from './brain';
+import { temporalInput } from '../lib/temporal-graph';
 import type { GraphData } from '../lib/graph';
+import { FAVORITES_KEY, sanitizeFavorites, toggleFavorite } from '../lib/favorites';
+import { PANE_DEFAULT, PANE_KEY, clampPaneWidth } from '../lib/pane';
 import './mermaid';
 
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
@@ -16,8 +19,71 @@ type Filter = (typeof FILTERS)[number];
 
 let graph: GraphData = { nodes: [], edges: [], viewNodes: [], viewLinks: [] };
 let brain: Brain | null = null;
+let graphMode: 'current' | 'temporal' = 'current';
 let view = 'map';
+let pageCleanup: (() => void) | undefined;
+let pageMount = 0;
 let trail: string[] = local.get('mybr-trail', []);
+let favorites: string[] = [];
+function renderFavorites() {
+  const nav = $('[data-favorites]'), ul = $('[data-favorites-list]');
+  if (!nav || !ul) return;
+  let known: { uid: string; title: string; url: string }[] = [];
+  try { known = JSON.parse(nav.dataset.notes ?? '[]'); } catch { /* 목록 없이도 동작한다 */ }
+  const byUid = new Map(known.map((n) => [n.uid, n]));
+  favorites = sanitizeFavorites(favorites, new Set(byUid.keys()));
+  ul.replaceChildren(...favorites.map((uid) => {
+    const li = document.createElement('li'), a = document.createElement('a');
+    a.className = 'cat fav-link'; a.href = byUid.get(uid)!.url; a.textContent = byUid.get(uid)!.title;
+    li.append(a); return li;
+  }));
+  nav.hidden = favorites.length === 0;
+  for (const b of $$('[data-fav-toggle]')) b.setAttribute('aria-pressed', String(favorites.includes(b.dataset.uid ?? '')));
+}
+function bindFavorites() {
+  favorites = local.get<string[]>(FAVORITES_KEY, []);
+  for (const b of $$('[data-fav-toggle]')) {
+    b.hidden = false;
+    if (b.dataset.bound) continue;
+    b.dataset.bound = '1';
+    b.addEventListener('click', () => { favorites = toggleFavorite(favorites, b.dataset.uid ?? ''); local.set(FAVORITES_KEY, favorites); renderFavorites(); });
+  }
+  renderFavorites();
+}
+function bindPaneResize() {
+  const handle = $('.pane-resize');
+  if (!handle || handle.dataset.bound) return;
+  handle.dataset.bound = '1';
+  const root = document.documentElement;
+  const current = () => clampPaneWidth(parseFloat(getComputedStyle(root).getPropertyValue('--pane-w')) || PANE_DEFAULT);
+  const set = (w: number, save: boolean) => {
+    const width = clampPaneWidth(w);
+    root.style.setProperty('--pane-w', `${width}px`);
+    handle.setAttribute('aria-valuenow', String(width));
+    if (save) local.set(PANE_KEY, width);
+  };
+  const reset = () => { root.style.removeProperty('--pane-w'); handle.setAttribute('aria-valuenow', String(PANE_DEFAULT)); local.set(PANE_KEY, PANE_DEFAULT); };
+  handle.setAttribute('aria-valuenow', String(current()));
+  handle.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); handle.setPointerCapture(e.pointerId); root.classList.add('pane-resizing');
+  });
+  handle.addEventListener('pointermove', (e) => { if (handle.hasPointerCapture(e.pointerId)) set(e.clientX, false); });
+  const end = (e: PointerEvent) => {
+    if (!handle.hasPointerCapture(e.pointerId)) return;
+    handle.releasePointerCapture(e.pointerId); root.classList.remove('pane-resizing'); set(e.clientX, true);
+  };
+  handle.addEventListener('pointerup', end);
+  handle.addEventListener('pointercancel', end);
+  handle.addEventListener('dblclick', reset);
+  handle.addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 48 : 16;
+    if (e.key === 'ArrowLeft') set(current() - step, true);
+    else if (e.key === 'ArrowRight') set(current() + step, true);
+    else if (e.key === 'Home') reset();
+    else return;
+    e.preventDefault();
+  });
+}
 const threadPaths = new Map<HTMLElement, SVGPathElement>();
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -26,7 +92,7 @@ function threads() {
   if (!brain) return;
   const svg = $<SVGSVGElement>('#threads');
   if (!svg) return;
-  const hide = view === 'note' || view === 'about';
+  const hide = view === 'note' || view === 'about' || view === 'activity' || view === 'history';
   svg.classList.toggle('off', hide);
   if (hide) return;
   threadPaths.forEach((p, r) => {
@@ -70,10 +136,24 @@ const values = (n: Item, f: Filter) => (f === 'growth' ? [n.growth] : f === 'kin
 const passes = (n: Item, f: Record<Filter, Set<string>>, skip?: Filter) =>
   FILTERS.every((k) => k === skip || !f[k].size || values(n, k).some((v) => f[k].has(v)));
 
+/* 필터에 맞는 글과 고른 필터 점을 뇌에서 밝힌다. 필터가 없으면 null. */
+const filterSlug = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '-');
+function filterFocus(): Set<string> | null {
+  const f = readFilters();
+  if (!FILTERS.some((k) => f[k].size)) return null;
+  const section = $('[data-view]')?.dataset.section;
+  const ids = new Set(graph.nodes.filter((n) => (!section || n.section === section) && passes(n, f)).map((n) => n.uid));
+  if (section) ids.add(`section-${section}`);
+  for (const k of FILTERS) for (const v of f[k]) ids.add(`${k}-${k === 'tag' ? filterSlug(v) : v}`);
+  return ids;
+}
+const brainFocus = (focusId: string | undefined) => filterFocus() ?? focusSet(focusId);
+
 function applyFilters() {
   const main = $('[data-view]'), section = main?.dataset.section, f = readFilters();
   const pool = graph.nodes.filter((n) => !section || n.section === section);
   const active = FILTERS.some((k) => f[k].size);
+  if (brain && view !== 'history' && view !== 'map') brain.focus(brainFocus(main?.dataset.focus));
   for (const b of $$('.f')) {
     const name = b.dataset.f as Filter, v = b.dataset.v!;
     const n = pool.filter((x) => passes(x, f, name) && values(x, name).includes(v)).length;
@@ -109,7 +189,7 @@ function bindFilters() {
 
 /* 읽은 자리를 잇는 길 */
 function walk(id: string) {
-  if (!brain || trail[trail.length - 1] === id) return;
+  if (view === 'history' || !brain || trail[trail.length - 1] === id) return;
   if (trail.length) brain.fire(trail[trail.length - 1], id, 0);
   trail = [...trail, id].slice(-40);
   local.set('mybr-trail', trail); brain.trail(trail); showClear();
@@ -183,7 +263,13 @@ function bindReader() {
   }
 }
 
+function cleanPage() {
+  pageMount++;
+  pageCleanup?.(); pageCleanup = undefined;
+}
+
 function syncPage() {
+  cleanPage();
   const main = $('[data-view]');
   view = main?.dataset.view ?? 'map';
   const focusId = main?.dataset.focus;
@@ -194,12 +280,51 @@ function syncPage() {
     a.addEventListener('pointerleave', () => brain?.light(null));
   });
   $('.trail-clear')?.addEventListener('click', () => { trail = []; local.set('mybr-trail', []); brain?.trail([]); showClear(); });
-  showClear(); bindFilters(); applyFilters(); tieRows(); bindReader();
+  showClear(); bindFilters(); applyFilters(); tieRows(); bindReader(); bindFavorites(); bindPaneResize();
+  const filterBox = $<HTMLDetailsElement>('.filter-box');
+  if (filterBox && !narrow()) filterBox.open = true;
   if (brain) {
     brain.mark(null);
-    if (view === 'map') { brain.miniOff(); brain.focus(null); }
-    else { brain.focus(focusSet(focusId)); frameMap(focusId && brain.has(focusId) ? focusId : null); }
+    if (view === 'map' || view === 'history') { brain.miniOff(); brain.focus(null); }
+    else { brain.focus(brainFocus(focusId)); frameMap(focusId && brain.has(focusId) ? focusId : null); }
     if (view === 'note' && focusId) walk(focusId);
+  }
+  const activity = $('[data-activity]');
+  if (activity) {
+    const mount = pageMount;
+    const paused = brain?.isPaused();
+    brain?.setPaused(true);
+    const restore = () => { if (paused !== undefined) brain?.setPaused(paused); };
+    pageCleanup = restore;
+    void import('./activity').then(({ mountActivity }) => {
+      if (mount !== pageMount || !activity.isConnected) return;
+      const cleanup = mountActivity(activity);
+      pageCleanup = () => { cleanup(); restore(); };
+    });
+  }
+  const path = $('[data-path]');
+  if (path) {
+    const mount = pageMount;
+    void import('./paths').then(({ mountPaths }) => {
+      if (mount !== pageMount || !path.isConnected) return;
+      pageCleanup = mountPaths(path, { focusNodes: uids => brain?.focus(uids), clearFocus: () => brain?.focus(null) });
+    });
+  }
+  const historyRoot = $('[data-history]');
+  if (historyRoot) {
+    const mount = pageMount, paused = brain?.isPaused();
+    graphMode = 'temporal';
+    replaceBrain({ nodes: [], links: [] }, paused);
+    const restoreCurrent = () => { graphMode = 'current'; replaceBrain(currentInput(), paused); };
+    pageCleanup = restoreCurrent;
+    void import('./history').then(({ mountHistory }) => {
+      if (mount !== pageMount || !historyRoot.isConnected) return;
+      pageCleanup = mountHistory(historyRoot, {
+        graph, restoreCurrent,
+        showAt: uids => { replaceBrain(temporalInput(graph, uids), brain?.isPaused()); },
+        refit: () => brain?.fit(420),
+      });
+    });
   }
   if (view !== 'map' && !$('.f[aria-pressed="true"]:focus')) $<HTMLElement>('.reader h1')?.focus({ preventScroll: true });
   threads();
@@ -211,19 +336,26 @@ function setFold(v: boolean) {
   (v ? $('.unfold') : $('.fold'))?.focus();
 }
 
-async function boot() {
-  try {
-    const res = await fetch(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/graph.json`);
-    if (res.ok) graph = await res.json();
-  } catch { /* 그래프가 없어도 목록과 글은 동작한다 */ }
+function currentInput(): { nodes: NodeInput[]; links: { source: string; target: string }[] } {
+  return {
+    nodes: [
+      ...graph.nodes.map(n => ({ id: n.uid, label: n.title, kind: 'post' as Kind, url: n.url, growth: n.growth })),
+      ...graph.viewNodes.map(n => ({ id: n.id, label: n.label, kind: KIND[n.type], url: n.url })),
+    ], links: [...graph.edges, ...graph.viewLinks],
+  };
+}
+function updateTools() {
+  const stop = $('.stop');
+  if (!stop || !brain) return;
+  stop.textContent = brain.isPaused() ? '다시 움직이기' : '움직임 멈추기';
+  stop.setAttribute('aria-pressed', String(brain.isPaused()));
+}
+function replaceBrain(input: { nodes: NodeInput[]; links: { source: string; target: string }[] }, paused?: boolean) {
   const svg = $<SVGSVGElement>('#brain');
-  const nodes: NodeInput[] = [
-    ...graph.nodes.map((n) => ({ id: n.uid, label: n.title, kind: 'post' as Kind, url: n.url, growth: n.growth })),
-    ...graph.viewNodes.map((n) => ({ id: n.id, label: n.label, kind: KIND[n.type], url: n.url })),
-  ];
-  if (svg) {
+  if (!svg) return;
+  brain?.destroy();
     brain = createBrain(svg, {
-      nodes, links: [...graph.edges, ...graph.viewLinks],
+      ...input, initiallyPaused: paused,
       spread: narrow() ? 0.62 : 1.3, scale: narrow() ? 0.82 : 1, margin: narrow() ? 30 : 84, startK: narrow() ? 1 : 1.4,
       inset() { const r = $('.recent'), s = $('.stage'); return r && s && !narrow() ? Math.max(0, r.getBoundingClientRect().right - s.getBoundingClientRect().left) : 0; },
       onNode(d, e) { e.preventDefault(); if (d.url) navigate(d.url); },
@@ -231,21 +363,32 @@ async function boot() {
       onFrame: threads,
       onResize() { threads(); },
     });
-    brain.trail(trail.filter((id) => brain!.has(id)));
+  if (graphMode === 'current') brain.trail(trail.filter(id => brain!.has(id)));
+  updateTools();
+}
+
+async function boot() {
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/graph.json`);
+    if (res.ok) graph = await res.json();
+  } catch { /* 그래프가 없어도 목록과 글은 동작한다 */ }
+  replaceBrain(currentInput());
+  if (brain) {
     $('.z-in')?.addEventListener('click', () => brain!.zoomBy(1.4));
     $('.z-out')?.addEventListener('click', () => brain!.zoomBy(1 / 1.4));
     $('.z-fit')?.addEventListener('click', () => brain!.fit(420));
     $('.unfold')?.addEventListener('click', () => setFold(false));
-    const stop = $('.stop')!, label = () => { stop.textContent = brain!.isPaused() ? '다시 움직이기' : '움직임 멈추기'; stop.setAttribute('aria-pressed', String(brain!.isPaused())); };
-    stop.addEventListener('click', () => { brain!.setPaused(!brain!.isPaused()); label(); }); label();
+    $('.stop')?.addEventListener('click', () => { brain!.setPaused(!brain!.isPaused()); updateTools(); }); updateTools();
   }
   syncPage();
   document.addEventListener('astro:page-load', syncPage);
 }
 
+document.addEventListener('astro:before-swap', cleanPage);
+
 document.addEventListener('astro:before-preparation', () => { document.documentElement.dataset.from = view; });
 document.addEventListener('astro:after-swap', () => { document.documentElement.dataset.from = view; });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && view !== 'map') $<HTMLAnchorElement>('.reader .close')?.click();
+  if (e.key === 'Escape' && view !== 'map') $<HTMLAnchorElement>('.reader .close, .history-panel .close')?.click();
 });
 boot();

@@ -1,0 +1,11 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '../../layouts/Shell.astro';
+import Close from '../../components/Close.astro';
+import { url } from '../../lib/site';
+import '../../styles/paths.css';
+const paths = (await getCollection('paths')).sort((a, b) => b.data.publishedOn.localeCompare(a.data.publishedOn) || a.id.localeCompare(b.id));
+---
+<Shell title="Paths" view="paths" active="paths"><Close /><h1 tabindex="-1">Paths</h1><p class="note-sum">문제를 따라 이어 둔 기록.</p>
+  {paths.length === 0 ? <p class="note-sum">아직 공개한 경로가 없습니다.</p> : <ol class="entries">{paths.map(path => <li class="entry entry-path"><a href={url(`/paths/${path.id}/`)}><span class="path-glyph" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15c0-4 4-4 6-4s6 0 6-4"/><circle cx="4" cy="15" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="5" r="2" fill="currentColor" stroke="none"/></svg></span><span class="e-main"><b>{path.data.title}</b><span class="e-sum">{path.data.summary}</span><ol class="path-chain" aria-label="단계">{path.data.steps.map(step => <li>{step.title}</li>)}</ol><span class="e-meta"><time datetime={path.data.publishedOn}>{path.data.publishedOn}</time><span>{path.data.steps.length}단계</span></span></span></a></li>)}</ol>}
+</Shell>

@@ -1,0 +1,8 @@
+---
+import { getCollection } from 'astro:content';
+import { pathsForNote } from '../lib/paths';
+import { url } from '../lib/site';
+interface Props { uid: string }
+const paths = pathsForNote(Astro.props.uid, (await getCollection('paths')).map(entry => entry.data));
+---
+{paths.length > 0 && <section class="references"><h2>이 글이 포함된 경로</h2><ul>{paths.map(path => <li><a href={url(`/paths/${path.id}/`)}>{path.title}</a></li>)}</ul></section>}

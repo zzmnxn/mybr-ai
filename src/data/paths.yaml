@@ -1,0 +1,26 @@
+# 실제로 확인한 공개 경로만 발행합니다.
+- id: path-cpp-containers
+  title: C++ 컨테이너 고르기
+  summary: vector에서 시작해 stack·queue, set, map까지 자료구조를 고르는 기준을 순서대로 읽는다.
+  publishedOn: "2026-11-11"
+  steps:
+    - id: step-vector
+      title: vector로 시작하기
+      description: 가장 기본이 되는 순차 컨테이너의 동작과 쓰임을 먼저 정리한다.
+      noteUids:
+        - know-cpp-vector
+    - id: step-stack-queue
+      title: stack과 queue
+      description: 넣고 빼는 순서가 정해진 자료구조를 이해한다.
+      noteUids:
+        - know-cpp-stack-queue
+    - id: step-set
+      title: 중복 없이 모으기
+      description: set을 쓸지, vector에 unique를 쓸지 고르는 기준을 본다.
+      noteUids:
+        - know-cpp-set-vector-unique
+    - id: step-map
+      title: 키로 찾기
+      description: 정렬되는 map과 해시 기반 unordered_map의 차이를 비교한다.
+      noteUids:
+        - know-cpp-map-unordered-map

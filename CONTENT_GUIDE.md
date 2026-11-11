@@ -114,3 +114,24 @@ flowchart LR
 5. 라이트·다크와 1440 / 768 / 390px에서 표·코드·도식, 내부 이동, 원문 펼치기를 확인한다.
 
 이 문서는 작성 기준이며, 개별 이관 글이 검토·검증·공개됐다는 기록은 아니다.
+
+## 9. 공개 활동 기록
+
+`/activity`는 글의 `publishedAt`에서 발행 활동을 자동 생성한다. `originalPublishedAt`, `createdAt`, Git 커밋 날짜는 발행 날짜를 대신하지 않는다. 날짜만 알면 `YYYY-MM-DD`를 쓰고, 시각을 쓰는 경우 `Z`나 명시적인 offset을 포함한다. 시각은 서울 기준 날짜에 집계된다.
+
+확인한 수정·복습·연결만 `src/data/activities.yaml`에 수동으로 추가한다. 처음의 `[]`는 기록이 없다는 뜻이며, 기록을 추가할 때 YAML 배열로 바꾼다.
+
+- 공통: 고유 `id`(`act-` + kebab-case), `kind`, 날짜 전용 `on`. `visibility`는 생략하거나 `public`만 쓴다.
+- `revise`, `review`: 기존 글의 `noteUid`를 쓴다. 같은 글·같은 날짜의 복습은 한 건만 허용한다.
+- `link`: `fromUid`, `toUid`, `relation`을 쓴다. 기존 글에 선언한 관계의 방향·유형과 일치해야 한다. `prerequisites`는 선언 글에서 선행 글로 향하는 `prerequisite`, `projectRefs`는 선언 글에서 프로젝트 글로 향하는 `part-of`다.
+- 선택 `detail`은 공개할 수 있는 280자 이내 한 줄 평문이다. 수정의 선택 `evidenceKey`는 중복 근거 검사에만 쓰며 활동 JSON에는 포함하지 않는다. 이 필드도 공개 저장소에 있으므로 비밀을 넣지 않는다.
+
+발행 활동을 수동으로 중복 입력하거나, 앞으로 쓸 글·미래 날짜·추정한 경험을 기록하지 않는다. 읽기 trail은 복습으로 집계하지 않는다. 공개 원본을 수정하면 다음 빌드에 반영된다. `npm run verify`, `node --test scripts/*.test.mjs`, `npm run check`, `npm run build`로 검증한다.
+
+JS가 없거나 데이터 로드에 실패하면 월별 정적 목록에서 글을 읽을 수 있다. 기본 목록의 월은 빌드 시점 기준이며, 임의 query를 서버가 해석하지 않는다.
+
+## 10. 고정 글과 즐겨찾기
+
+홈의 "고정 글"은 `src/data/pinned.yaml`에 `id`(`pin-` + kebab-case)와 `noteUid`를 위에서부터 순서대로 적는다. 없는 UID나 같은 글의 중복 고정은 `npm run verify`가 거부한다. 고정한 글은 홈의 최근 글에서 중복해 보이지 않는다. 처음의 `[]`는 고정 글이 없다는 뜻이다.
+
+글 상세의 별 버튼으로 하는 즐겨찾기는 방문자의 브라우저(`localStorage`의 `mybr-favorites`)에만 저장된다. 서버, 계정, 기기 간 동기화는 없고, 읽기 trail과도 별개다. 파일에 남기지 않으므로 이 문서의 검증 대상이 아니다.

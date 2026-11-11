@@ -2,6 +2,8 @@
 import { render } from 'astro:content';
 import GrowthDot from '../../components/GrowthDot.astro';
 import Close from '../../components/Close.astro';
+import NavIcon from '../../components/NavIcon.astro';
+import NotePaths from '../../components/NotePaths.astro';
 import Related from '../../components/Related.astro';
 import Shell from '../../layouts/Shell.astro';
 import { domainId, getNotes, tagId } from '../../lib/graph';
@@ -22,6 +24,7 @@ const topics = [...d.domains, ...d.tags];
     <Close list={{ href: url(section.path) }} />
     <h1 tabindex="-1">{d.title}</h1>
     <p class="note-sum">{d.summary}</p>
+    <button type="button" class="fav-toggle" data-fav-toggle data-uid={d.uid} aria-pressed="false" hidden><NavIcon name="star" /><span>즐겨찾기</span></button>
     <dl class="note-facts">
       <div><dt>분류</dt><dd>{section.label} · {KIND_LABEL[d.kind]}</dd></div>
       <div><dt>발행</dt><dd><time datetime={d.publishedAt?.toISOString().slice(0, 10)}>{day(d.publishedAt)}</time></dd></div>
@@ -39,6 +42,7 @@ const topics = [...d.domains, ...d.tags];
     {d.references && d.references.length > 0 && (
       <section class="references"><h2>참고</h2><ul>{d.references.map((r) => <li><a href={r.url}>{r.title}</a></li>)}</ul></section>
     )}
+    <NotePaths uid={d.uid} />
     <div class="related-end"><Related uid={d.uid} topics={topics} /></div>
   </article>
   <aside slot="side" class="side" aria-label="이어진 글"><Related uid={d.uid} topics={topics} /></aside>

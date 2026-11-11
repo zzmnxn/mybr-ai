@@ -1,0 +1,15 @@
+---
+import ActivitySymbol from './ActivitySymbol.astro';
+import { ACTIVITY_LABELS, dateLabel, type ActivityPayload } from '../lib/activity-calendar';
+import type { Activity } from '../lib/activity';
+interface Props { day: string; events: Activity[]; notes: ActivityPayload['notes']; paths?: ActivityPayload['paths'] }
+const { day, events, notes, paths } = Astro.props;
+---
+<section class="activity-day-record" id={`day-${day}`}>
+  <div class="activity-date-heading"><ActivitySymbol count={events.length} /><h3>{dateLabel(day)} <span class="activity-muted">· {events.length}건</span></h3></div>
+  {events.length === 0 ? <p>공개 기록이 없습니다</p> : <ul class="activity-events">{events.map(event => <li>
+    <p class="activity-event-meta">{ACTIVITY_LABELS[event.kind]} · {event.source === 'frontmatter' ? '기재된 발행일 기준' : '직접 남긴 기록'}</p>
+    <div class="activity-event-links">{event.pathId && paths?.[event.pathId] && <a href={paths[event.pathId].url}>{paths[event.pathId].title}</a>}{event.noteUids.map(uid => <a href={notes[uid].url}>{notes[uid].title}</a>)}</div>
+    {event.detail && <p>{event.detail}</p>}
+  </li>)}</ul>}
+</section>

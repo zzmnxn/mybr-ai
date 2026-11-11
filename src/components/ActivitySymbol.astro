@@ -1,0 +1,13 @@
+---
+import zero from '../assets/activity/activity-0.svg?raw';
+import one from '../assets/activity/activity-1.svg?raw';
+import two from '../assets/activity/activity-2.svg?raw';
+import three from '../assets/activity/activity-3.svg?raw';
+import four from '../assets/activity/activity-4.svg?raw';
+import many from '../assets/activity/activity-5plus.svg?raw';
+import { symbolLevel } from '../lib/activity-calendar';
+interface Props { count: number }
+const { count } = Astro.props;
+const symbols = [zero, one, two, three, four, many];
+---
+<span class="activity-symbol" aria-hidden="true" set:html={symbols[symbolLevel(count)]} />

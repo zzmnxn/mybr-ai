@@ -1,0 +1,14 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '../../layouts/Shell.astro';
+import PathSteps from '../../components/PathSteps.astro';
+import { url } from '../../lib/site';
+import '../../styles/paths.css';
+export async function getStaticPaths() { return (await getCollection('paths')).map(path => ({ params: { id: path.id }, props: { path: path.data } })); }
+const { path } = Astro.props;
+---
+<Shell title={path.title} description={path.summary} view="paths" active="paths"><article data-path>
+  <div class="note-nav"><a class="close" href={url('/paths/')}>경로 목록으로</a><a class="close" href={url('/')}>뇌로 돌아가기</a></div>
+  <h1 tabindex="-1">{path.title}</h1><p class="note-sum">{path.summary}</p><p class="path-position"><time datetime={path.publishedOn}>{path.publishedOn}</time></p>
+  <PathSteps path={path} />
+</article></Shell>
