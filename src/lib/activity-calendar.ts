@@ -97,19 +97,31 @@ export function validateActivityPayload(value: unknown, base: string): ActivityP
   return data;
 }
 
-/** 활동한 날을 시간 순서의 굽은 선 위에 놓는다. 선은 날짜 순서일 뿐 글 사이의 관계가 아니다. */
+/** 활동한 날을 공간에 흩어 놓고 날짜 순서로 잇는다. 글 사이의 관계는 표현하지 않는다. */
 export function monthNetwork(events: readonly { day: string }[], month: string, width = 280, height = 170) {
   const counts = new Map<string, number>();
   for (const e of events) if (e.day.startsWith(month)) counts.set(e.day, (counts.get(e.day) ?? 0) + 1);
   const entries = [...counts].sort(([a], [b]) => a.localeCompare(b));
   const peak = Math.max(0, ...entries.map(([, c]) => c));
-  const cx = width / 2, cy = height / 2, n = entries.length;
-  const nodes = entries.map(([day, count], i) => {
-    const t = n === 1 ? 0.5 : i / (n - 1), angle = (-0.9 + t * 4.4) * Math.PI / 1.4 - Math.PI / 2;
-    const wobble = 1 + 0.16 * Math.sin(i * 2.3);
-    const r = Math.min(3 + count * 1.8, 11);
-    const rx = (width / 2 - 16 - r) * wobble, ry = (height / 2 - 14 - r) * wobble;
-    return { day, count, r, peak: count === peak, x: n === 1 ? cx : cx + Math.cos(angle) * Math.min(rx, width / 2 - 16 - r), y: n === 1 ? cy : cy + Math.sin(angle) * Math.min(ry, height / 2 - 14 - r) };
-  });
-  return { width, height, nodes, edges: nodes.slice(1).map((_, i) => [i, i + 1] as const) };
+  let seed = [...month].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 7);
+  const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  const nodes: { day: string; count: number; r: number; peak: boolean; x: number; y: number }[] = [];
+  for (const [day, count] of entries) {
+    const r = Math.min(3 + count * 1.8, 11), padding = r + 12;
+    let position = { x: width / 2, y: height / 2 }, clearance = -Infinity;
+    // 다른 점과 떨어진 후보를 고르고, 같은 월은 재표시해도 배치를 유지한다.
+    for (let attempt = 0; attempt < 512 && entries.length > 1; attempt++) {
+      const candidate = { x: padding + random() * (width - padding * 2), y: padding + random() * (height - padding * 2) };
+      const space = nodes.length ? Math.min(...nodes.map(node => Math.hypot(candidate.x - node.x, candidate.y - node.y) - r - node.r)) : 0;
+      if (space > clearance) { position = candidate; clearance = space; }
+    }
+    nodes.push({ day, count, r, peak: count === peak, ...position });
+  }
+  const edges = nodes.slice(1).map((_, i) => [i, i + 1] as const);
+  const path = edges.map(([from, to], i) => {
+    const a = nodes[from], b = nodes[to], dx = b.x - a.x, dy = b.y - a.y;
+    const length = Math.hypot(dx, dy), bend = (i % 2 ? -1 : 1) * Math.min(12, length * .18);
+    return `M${a.x},${a.y} Q${(a.x + b.x) / 2 - dy / length * bend},${(a.y + b.y) / 2 + dx / length * bend} ${b.x},${b.y}`;
+  }).join(' ');
+  return { width, height, nodes, edges, path };
 }

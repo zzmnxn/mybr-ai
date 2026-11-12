@@ -1,4 +1,5 @@
-.activity { --activity-node: var(--color-trail); --activity-line: color-mix(in srgb, var(--color-trail) 55%, var(--color-rule)); }
+.activity { --activity-node: var(--color-trail); --activity-line: color-mix(in srgb, var(--color-trail) 55%, var(--color-rule)); --activity-day-glow: .3; --activity-day-hover-glow: .5; }
+:root[data-theme="light"] .activity { --activity-node: #8DAADE; --activity-line: color-mix(in srgb, var(--activity-node) 75%, var(--color-rule)); --activity-day-glow: .55; --activity-day-hover-glow: .75; }
 .reader[data-view="activity"] { right: 0; }
 .app:has([data-view="activity"]) .progress { right: 0; }
 .reader[data-view="activity"] .reader-in { max-width: 1440px; padding-inline: clamp(16px, 3vw, 48px); }
@@ -30,7 +31,9 @@
 .activity-day-number { font-size: .8125rem; }
 .activity-symbol { display: inline-block; flex: none; width: 40px; height: 40px; }
 .activity-symbol svg { width: 100%; height: 100%; }
-.activity-map button:hover:not([aria-pressed="true"])::before { opacity: .5; }
+:root[data-theme="light"] .activity-symbol circle { fill: var(--color-paper); stroke: var(--activity-node); stroke-width: 2.2; }
+.activity-map button.has-activity::before { opacity: var(--activity-day-glow); }
+.activity-map button:hover:not([aria-pressed="true"])::before { opacity: var(--activity-day-hover-glow); }
 .activity-map .activity-symbol { width: 56px; height: 56px; }
 .activity-map button[aria-pressed="true"] { background: transparent; padding-bottom: 18px; }
 .activity-map button[aria-pressed="true"]::before { opacity: 1; }
@@ -72,6 +75,13 @@
 .net-line { fill: none; stroke: var(--color-trail); stroke-width: 1.5; stroke-opacity: .55; }
 .net-node { fill: var(--color-paper); stroke: var(--color-trail); stroke-width: 1.75; }
 .net-node.is-peak { fill: var(--color-trail); }
+.net-node { cursor: help; }
+.net-node:hover, .net-node:focus-visible { stroke-width: 3; }
+.net-node:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.activity-network-detail { min-height: 2.6em; margin: -4px 0 16px; color: var(--color-muted); font-size: .8125rem; line-height: 1.6; }
+.activity-network-example { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--color-rule); }
+.activity-network-example summary { cursor: pointer; font-size: .875rem; }
+.activity-network-example > p { margin-top: 12px; }
 .activity-legend small { font-size: .6875rem; }
 .activity-summary > p { margin: -6px 0 0; }
 .activity-summary dl { margin: 0; display: grid; gap: 10px; }

@@ -52,3 +52,28 @@ test('month network keeps one node per active day inside bounds and in date orde
   assert.deepEqual(monthNetwork(list, '2026-09').nodes, []);
   assert.equal(monthNetwork(list.slice(0, 1), '2026-11').edges.length, 0);
 });
+
+test('month network scatters a full month through the interior without overlapping nodes', () => {
+  for (const activitiesPerDay of [1, 6]) {
+    const days = Array.from({ length: 30 }, (_, i) => ({ day: `2026-11-${String(i + 1).padStart(2, '0')}` }));
+    const events = days.flatMap(day => Array.from({ length: activitiesPerDay }, () => day));
+    const net = monthNetwork(events, '2026-11');
+    assert.deepEqual(net, monthNetwork([...events].reverse(), '2026-11'));
+    const interior = net.nodes.filter(node => Math.abs(node.x - net.width / 2) < net.width * .3 && Math.abs(node.y - net.height / 2) < net.height * .3);
+    assert.ok(interior.length >= 6, 'the center should contain days instead of an empty oval');
+    for (const [i, node] of net.nodes.entries()) {
+      assert.ok(node.x >= node.r && node.x <= net.width - node.r);
+      assert.ok(node.y >= node.r && node.y <= net.height - node.r);
+      for (const other of net.nodes.slice(i + 1)) assert.ok(Math.hypot(node.x - other.x, node.y - other.y) >= node.r + other.r + 3, 'date nodes should stay apart');
+    }
+    assert.equal(net.path.match(/M/g)?.length, 29);
+    assert.equal(net.path.match(/Q/g)?.length, 29);
+    assert.ok(!net.path.includes('NaN'));
+  }
+});
+
+test('month network keeps the largest nodes apart in a 31-day month', () => {
+  const events = Array.from({ length: 31 }, (_, i) => Array.from({ length: 6 }, () => ({ day: `2026-03-${String(i + 1).padStart(2, '0')}` }))).flat();
+  const { nodes } = monthNetwork(events, '2026-03');
+  for (const [i, node] of nodes.entries()) for (const other of nodes.slice(i + 1)) assert.ok(Math.hypot(node.x - other.x, node.y - other.y) >= node.r + other.r + 3);
+});

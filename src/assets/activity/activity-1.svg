@@ -1,5 +1,6 @@
 <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  
-  
-  <g><circle cx="24" cy="24" r="4.35" fill="var(--activity-node, #627DB9)" /></g>
+  <g>
+    <path d="M24 24 18 9 M24 24 39 18 M24 24 18 37" fill="none" stroke="var(--activity-node, #627DB9)" stroke-width="2.25" stroke-linecap="round" />
+    <circle cx="24" cy="24" r="4.35" fill="var(--activity-node, #627DB9)" />
+  </g>
 </svg>

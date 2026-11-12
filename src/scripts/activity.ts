@@ -38,6 +38,34 @@ export function mountActivity(root: HTMLElement): () => void {
   }
   const observer = new ResizeObserver(positionDays);
   observer.observe(map);
+  function renderNetwork(svg: SVGSVGElement, net: ReturnType<typeof monthNetwork>, example = false) {
+    const NS = 'http://www.w3.org/2000/svg';
+    svg.replaceChildren(); svg.classList.toggle('has-nodes', net.nodes.length > 0);
+    svg.setAttribute('aria-label', example ? '매일 1개씩 30일 활동한 예시 네트워크' : `이번 달 활동한 날 ${net.nodes.length}일의 시간 순서 네트워크`);
+    svg.closest('[data-network-view]')!.querySelector('[data-network-detail]')!.textContent = net.nodes.length ? '점에 마우스를 올리거나 선택하면 날짜와 활동 수가 나옵니다.' : '이 달에는 활동한 날이 없습니다.';
+    if (net.nodes.length > 1) {
+      const line = document.createElementNS(NS, 'path'); line.setAttribute('class', 'net-line');
+      line.setAttribute('d', net.path);
+      svg.append(line);
+    }
+    for (const p of net.nodes) {
+      const c = document.createElementNS(NS, 'circle');
+      const label = `${example ? `${Number(p.day.slice(-2))}일차` : shortDateLabel(p.day)} · 활동 ${p.count}개${example ? ' (예시)' : p.peak ? ' · 최다 활동일' : ''}`;
+      c.setAttribute('class', p.peak ? 'net-node is-peak' : 'net-node');
+      c.setAttribute('cx', String(p.x)); c.setAttribute('cy', String(p.y)); c.setAttribute('r', String(p.r));
+      c.setAttribute('tabindex', '0'); c.setAttribute('role', 'img'); c.setAttribute('aria-label', label);
+      c.dataset.networkLabel = label;
+      const title = document.createElementNS(NS, 'title'); title.textContent = label; c.append(title);
+      svg.append(c);
+    }
+  }
+  function describeNetwork(event: Event) {
+    const node = (event.target as Element).closest<SVGElement>('[data-network-label]');
+    if (node) node.closest('[data-network-view]')!.querySelector('[data-network-detail]')!.textContent = node.dataset.networkLabel!;
+  }
+  for (const type of ['pointerover', 'focusin', 'click']) root.addEventListener(type, describeNetwork, { signal: lifetime.signal });
+  const exampleDays = Array.from({ length: 30 }, (_, i) => ({ day: `2000-04-${String(i + 1).padStart(2, '0')}` }));
+  renderNetwork($<SVGSVGElement>('[data-example-network]'), monthNetwork(exampleDays, '2000-04'), true);
   function render(announce = false) {
     if (!data || !active) return;
     const grouped = groupActivitiesByDay(data.events);
@@ -47,20 +75,7 @@ export function mountActivity(root: HTMLElement): () => void {
     $('[data-month-title]').textContent = `${selection.month.slice(0, 4)}년 ${Number(selection.month.slice(5))}월`;
     $('[data-month-total]').textContent = `${summary.total}개`;
     $('[data-month-days]').textContent = `${summary.activeDays}일`;
-    const net = monthNetwork(data.events, selection.month), svg = $<SVGSVGElement>('[data-month-network]'), NS = 'http://www.w3.org/2000/svg';
-    svg.replaceChildren(); svg.classList.toggle('has-nodes', net.nodes.length > 0);
-    svg.setAttribute('aria-label', `이번 달 활동한 날 ${net.nodes.length}일의 시간 순서 네트워크`);
-    if (net.nodes.length > 1) {
-      const line = document.createElementNS(NS, 'path'); line.setAttribute('class', 'net-line');
-      line.setAttribute('d', net.nodes.map((p, i) => i ? `S${(net.nodes[i - 1].x + p.x) / 2},${p.y + (i % 2 ? -14 : 14)} ${p.x},${p.y}` : `M${p.x},${p.y}`).join(' '));
-      svg.append(line);
-    }
-    for (const p of net.nodes) {
-      const c = document.createElementNS(NS, 'circle');
-      c.setAttribute('class', p.peak ? 'net-node is-peak' : 'net-node');
-      c.setAttribute('cx', String(p.x)); c.setAttribute('cy', String(p.y)); c.setAttribute('r', String(p.r));
-      svg.append(c);
-    }
+    renderNetwork($<SVGSVGElement>('[data-month-network]'), monthNetwork(data.events, selection.month));
     $('[data-month-peak]').textContent = summary.peak ? `${shortDateLabel(summary.peak.day)} · ${summary.peak.count}개` : '없음';
     $('[data-month-empty]').hidden = monthEvents.length > 0;
     for (const button of root.querySelectorAll<HTMLButtonElement>('[data-month-shift]')) button.disabled = !shiftMonth(selection.month, Number(button.dataset.monthShift));
@@ -69,6 +84,7 @@ export function mountActivity(root: HTMLElement): () => void {
       const day = `${selection.month}-${String(i).padStart(2, '0')}`, count = grouped.get(day)?.length ?? 0;
       const li = document.createElement('li'), button = document.createElement('button');
       button.type = 'button'; button.dataset.day = day;
+      button.classList.toggle('has-activity', count > 0);
       button.setAttribute('aria-pressed', String(day === selection.day));
       button.setAttribute('aria-label', `${dateLabel(day)}, 공개 활동 ${count}건`);
       button.title = button.getAttribute('aria-label')!;

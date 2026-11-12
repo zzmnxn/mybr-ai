@@ -17,6 +17,7 @@ const days = Array.from({ length: daysInMonth(month) }, (_, i) => `${month}-${St
   <header class="activity-header">
     <p class="hand">내 활동을 네트워크로 보기</p><h1 tabindex="-1">Activity</h1>
     <p class="activity-muted">글 발행, 수정, 복습, 연결 같은 공개 활동을 하나의 네트워크로 시각화한 달력입니다.</p>
+    {import.meta.env.DEV && <p class="activity-muted">아이콘 확인용 임시 데이터 · 이번 달 1~6일에 0·1·2·3·4·6개를 표시합니다.</p>}
   </header>
   <div class="activity-interactive" hidden>
     <div class="activity-toolbar">
@@ -43,9 +44,20 @@ const days = Array.from({ length: daysInMonth(month) }, (_, i) => `${month}-${St
         </section>
         <section class="activity-summary" aria-labelledby="activity-summary-title">
           <h3 id="activity-summary-title">이번 달의 활동 네트워크</h3>
-          <p class="activity-muted">점은 활동한 날, 크기는 활동 수, 선은 날짜 순서입니다.</p>
-          <svg class="activity-network" data-month-network viewBox="0 0 280 170" role="img" aria-label=""></svg>
+          <p class="activity-muted">점은 활동한 날, 크기는 활동 수, 선은 날짜 순서입니다. 점의 위치는 글 사이의 관계를 뜻하지 않습니다.</p>
+          <div data-network-view>
+            <svg class="activity-network" data-month-network viewBox="0 0 280 170" role="group" aria-label=""></svg>
+            <p class="activity-network-detail" data-network-detail aria-live="polite"></p>
+          </div>
           <dl><div><dt>총 활동</dt><dd data-month-total></dd></div><div><dt>활동한 날</dt><dd data-month-days></dd></div><div><dt>가장 많은 날</dt><dd data-month-peak></dd></div></dl>
+          <details class="activity-network-example">
+            <summary>30일 연속 활동하면?</summary>
+            <p class="activity-muted">매일 1개씩, 30일 동안 활동한 예시입니다. 실제 기록에는 포함되지 않습니다.</p>
+            <div data-network-view>
+              <svg class="activity-network" data-example-network viewBox="0 0 280 170" role="group" aria-label=""></svg>
+              <p class="activity-network-detail" data-network-detail aria-live="polite"></p>
+            </div>
+          </details>
         </section>
       </div>
     </div>
