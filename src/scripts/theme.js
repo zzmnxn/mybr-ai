@@ -1,11 +1,11 @@
 // Runs in the head so the first painted frame uses the chosen theme.
 (() => {
   const system = matchMedia('(prefers-color-scheme: dark)');
-  let preference = 'system';
+  let preference = 'dark';
   try {
     const saved = localStorage.getItem('mybr-theme');
-    if (saved === 'light' || saved === 'dark') preference = saved;
-  } catch { /* System preference also works when storage is unavailable. */ }
+    if (saved === 'system' || saved === 'light' || saved === 'dark') preference = saved;
+  } catch { /* Keep the dark default when storage is unavailable. */ }
 
   function apply(root = document.documentElement) {
     root.dataset.theme = preference === 'system' ? (system.matches ? 'dark' : 'light') : preference;
