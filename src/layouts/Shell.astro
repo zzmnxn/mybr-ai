@@ -30,6 +30,7 @@ const pageTitle = title ? `${title} | mybr.ai` : 'mybr.ai';
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={view === 'note' ? 'article' : 'website'} />
+    <link rel="sitemap" href={url('/sitemap-index.xml')} />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

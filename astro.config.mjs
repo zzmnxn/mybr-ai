@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 // GitHub Pages: https://zzmnxn.github.io/mybr-ai/
 // 저장소 이름이나 도메인이 바뀌면 site와 base를 함께 고친다.
@@ -7,5 +8,6 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://zzmnxn.github.io',
   base: '/mybr-ai',
+  integrations: [sitemap()],
   markdown: { shikiConfig: { themes: { light: 'github-light-high-contrast', dark: 'github-dark-high-contrast' } } },
 });
