@@ -24,3 +24,18 @@
       description: 정렬되는 map과 해시 기반 unordered_map의 차이를 비교한다.
       noteUids:
         - know-cpp-map-unordered-map
+- id: path-mybr-ai-build
+  title: mybr.ai 만들기
+  summary: 개발 기록을 연결하는 개인 지식 사이트의 구상부터 UI 개편과 학습 기록 기능 확장까지 따라간다.
+  publishedOn: "2026-11-12"
+  steps:
+    - id: step-digital-brain-kickoff
+      title: 디지털 두뇌 구상과 첫 배포
+      description: 흩어진 개발 지식을 연결하려는 목적과 콘텐츠 구조, 기술 선택, 첫 배포 과정을 읽는다.
+      noteUids:
+        - hub-digital-brain-kickoff
+    - id: step-digital-brain-evolution
+      title: 지식이 쌓이는 과정 기록하기
+      description: 테마와 UI를 개편하고 Activity, Paths, History로 학습 기록과 탐색 방식을 확장한 과정을 읽는다.
+      noteUids:
+        - hub-digital-brain-evolution
