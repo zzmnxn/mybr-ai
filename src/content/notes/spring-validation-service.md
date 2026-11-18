@@ -16,6 +16,9 @@ source:
 tags: ["Spring Boot", "Validation", "테스트", "코드리뷰"]
 environment: "Spring Boot, Bean Validation, Mock 기반 테스트"
 outcome: resolved
+related:
+  - uid: exp-team-collaboration-retrospective
+    relation: related
 ---
 
 API 기능을 구현한 뒤 테스트를 작성하면서, 이미 검증했다고 생각한 요청에서 예상하지 못한 에러를 마주했다. 검증 로직이 흩어진 문제와 Mock 기반 테스트가 주는 안정감을 돌아보고, Service 레이어로 검증을 통일한 과정을 기록한다.

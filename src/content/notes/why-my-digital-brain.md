@@ -11,6 +11,11 @@ publication: published
 createdAt: 2026-11-06
 publishedAt: 2026-11-08
 tags: [Digital Garden, Astro, Knowledge Graph, AI-Assisted Development]
+related:
+  - uid: hub-devwiki-why
+    relation: related
+  - uid: hub-digital-brain-evolution
+    relation: related
 ---
 
 기존에는 [티스토리](https://wlals916.tistory.com/)에 개발 글을 작성했다.

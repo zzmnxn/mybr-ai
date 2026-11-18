@@ -42,6 +42,14 @@ for (const { file, data } of notes) {
   }
 }
 
+// related는 양방향이어야 한다. A가 B를 related로 선언하면 B도 A를 related로 선언한다.
+const relatedOf = new Map(notes.map((n) => [n.data.uid, new Set((n.data.related ?? []).map((r) => r.uid))]));
+for (const { file, data } of notes) {
+  for (const { uid } of data.related ?? []) {
+    if (uids.has(uid) && !relatedOf.get(uid).has(data.uid)) errors.push(`${file}: ${data.uid}가 ${uid}를 related로 선언했지만 반대 방향 related가 없습니다. 상대 글에도 ${data.uid}를 추가하세요`);
+  }
+}
+
 const seenPlans = new Set();
 for (const plan of planned) {
   if (seenPlans.has(plan.id)) errors.push(`src/data/planned.yaml: id 중복 ${plan.id}`);

@@ -25,3 +25,20 @@ test('verifier retains duplicate, draft, dangling and planned-reference failures
     for (const text of ['uid 중복', 'permalink 중복', 'draft', '관계 대상', '없는 대상', 'near 대상']) assert.ok(result.stderr.includes(text), result.stderr);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
+
+test('verifier rejects one-way related links', () => {
+  const root = mkdtempSync(join(tmpdir(), 'mybr-related-'));
+  try {
+    mkdirSync(join(root, 'src/content/notes'), { recursive: true });
+    mkdirSync(join(root, 'src/data'), { recursive: true });
+    for (const f of ['planned', 'activities', 'paths', 'pinned']) writeFileSync(join(root, `src/data/${f}.yaml`), '[]\n');
+    writeFileSync(join(root, 'src/content/notes/a.md'), '---\nuid: know-a\npermalink: a\npublication: published\nrelated:\n  - uid: know-b\n    relation: related\n---\n');
+    writeFileSync(join(root, 'src/content/notes/b.md'), '---\nuid: know-b\npermalink: b\npublication: published\n---\n');
+    const result = spawnSync(process.execPath, ['scripts/verify-content.mjs', root], { encoding: 'utf8' });
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes('반대 방향 related'), result.stderr);
+    writeFileSync(join(root, 'src/content/notes/b.md'), '---\nuid: know-b\npermalink: b\npublication: published\nrelated:\n  - uid: know-a\n    relation: related\n---\n');
+    const ok = spawnSync(process.execPath, ['scripts/verify-content.mjs', root], { encoding: 'utf8' });
+    assert.ok(!ok.stderr.includes('반대 방향 related'), ok.stderr);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

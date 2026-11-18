@@ -13,6 +13,8 @@ tags: [DevWiki, Agent Memory, Personal Wiki, Context Engineering, Claude Code, C
 related:
   - uid: hub-digital-brain-kickoff
     relation: related
+  - uid: hub-devwiki-first-architecture
+    relation: related
 references:
   - title: "Anthropic — Effective context engineering for AI agents"
     url: https://www.anthropic.com/research/effective-context-engineering-for-ai-agents

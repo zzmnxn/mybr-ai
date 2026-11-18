@@ -13,6 +13,8 @@ tags: [DevWiki, Agent Memory, Obsidian, GitHub Actions, OpenAI API]
 related:
   - uid: hub-devwiki-why
     relation: references
+  - uid: hub-devwiki-v2-v3
+    relation: related
 ---
 
 [DevWiki 구축기](../../paths/path-devwiki-build/) 2편 — v1의 두 가지 설계
