@@ -326,3 +326,26 @@ th { font-weight: 400; color: var(--color-muted); }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .astro-code, :root:not([data-theme]) .astro-code span { color: var(--shiki-dark) !important; }
 }
+.note-origin { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2xs) var(--space-xs); margin: 0 0 var(--space-sm); padding: var(--space-2xs) var(--space-sm); border-left: 2px solid var(--color-trail); background: var(--color-paper-2); color: var(--color-ink-2); font-size: var(--text-sm); }
+.note-origin time { font-variant-numeric: tabular-nums; color: var(--color-ink); }
+.note-origin a { color: var(--color-trail); }
+#note > h1 { position: relative; isolation: isolate; width: fit-content; max-width: 100%; margin-inline: auto; text-align: center; }
+#note > h1::before { content: ""; position: absolute; left: -12%; right: -12%; top: -35%; bottom: -35%; border-radius: 50%; background: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-trail) 26%, transparent) 0%, color-mix(in srgb, var(--color-trail) 10%, transparent) 55%, transparent 72%); z-index: -1; pointer-events: none; }
+/* 글 헤더 정리: 중앙 정렬, 한 덩어리로 */
+#note { overflow-x: clip; }
+#note > h1 { margin-top: var(--space-lg); }
+#note > .note-origin { width: fit-content; max-width: 100%; margin-inline: auto; }
+#note > .note-sum { max-width: 40rem; margin: var(--space-md) auto 0; text-align: center; }
+#note > .fav-toggle { display: flex; width: fit-content; min-height: 36px; margin: var(--space-xs) auto 0; }
+#note > .fav-toggle[hidden] { display: none; }
+#note > .note-facts { justify-content: center; margin-top: var(--space-xs); padding: 0; border: 0; color: var(--color-muted); }
+#note > .note-chips { justify-content: center; margin-top: var(--space-sm); padding-bottom: var(--space-lg); border-bottom: 1px solid var(--color-rule); }
+#note .chip { min-height: 24px; padding: 0 0.6em; font-size: 0.8125rem; }
+@media (max-width: 480px) { #note > .note-facts { gap: var(--space-2xs) var(--space-md); } }
+.fav-toggle[aria-pressed="true"] { color: #D9A400; }
+.fav-toggle[aria-pressed="true"] svg { fill: currentColor; }
+/* 뇌 그래프: 즐겨찾기는 노란 점, 고정 글은 점선 링 */
+.n.is-fav .dot, .n.is-fav:hover .dot { fill: #E3AE00; }
+.n.is-fav text { fill: var(--color-ink); font-weight: 600; }
+.pin-ring { fill: none; stroke: var(--color-trail); stroke-width: 1.2; stroke-dasharray: 2 3; opacity: .85; pointer-events: none; }
+.fav-toggle[aria-pressed="true"] span { color: var(--color-ink); }

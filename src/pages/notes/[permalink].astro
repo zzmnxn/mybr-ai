@@ -18,10 +18,18 @@ const d = note.data;
 const { Content } = await render(note);
 const section = SECTIONS[d.section];
 const topics = [...d.domains, ...d.tags];
+const origin = d.source?.type === 'tistory' && d.originalPublishedAt ? d.originalPublishedAt : undefined;
 ---
 <Shell title={d.title} description={d.summary} view="note" active={d.section} section={d.section} focus={d.uid}>
   <article id="note" data-uid={d.uid}>
     <Close list={{ href: url(section.path) }} />
+    {origin && (
+      <p class="note-origin">
+        <NavIcon name="history" />
+        <span>이 글은 <time datetime={origin.toISOString().slice(0, 10)}>{origin.getUTCFullYear()}년 {origin.getUTCMonth() + 1}월 {origin.getUTCDate()}일</time>에 Tistory에 처음 쓴 글을 옮겼습니다.</span>
+        {d.source?.url && <a href={d.source.url} rel="noopener">원문 보기</a>}
+      </p>
+    )}
     <h1 tabindex="-1">{d.title}</h1>
     <p class="note-sum">{d.summary}</p>
     <button type="button" class="fav-toggle" data-fav-toggle data-uid={d.uid} aria-pressed="false" hidden><NavIcon name="star" /><span>즐겨찾기</span></button>

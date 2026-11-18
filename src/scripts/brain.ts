@@ -6,7 +6,7 @@ import 'd3-transition';
 import { zoom, zoomIdentity, type ZoomTransform } from 'd3-zoom';
 
 export type Kind = 'post' | 'hub' | 'real' | 'tag' | 'ghost';
-export type NodeInput = { id: string; label: string; short?: string; kind: Kind; url?: string; growth?: string };
+export type NodeInput = { id: string; label: string; short?: string; kind: Kind; url?: string; growth?: string; pinned?: boolean };
 type Node = NodeInput & SimulationNodeDatum & { x: number; y: number; r: number; ph: number; ox: number; oy: number; px: number; py: number; g: SVGElement };
 type Link = SimulationLinkDatum<Node> & { line: SVGLineElement; source: string | Node; target: string | Node };
 type Pulse = { a: Node; b: Node; t: number; hops: number; c: SVGCircleElement };
@@ -56,11 +56,12 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
   let mini = false, touched = false, fitted = false, paused = opt.initiallyPaused ?? reduce, pulses: Pulse[] = [], running = true, last = 0, idle = 0, loopOn = false;
 
   for (const [i, d] of nodes.entries()) {
-    const g = el(d.url ? 'a' : 'g', { class: `n n-${d.kind}`, style: `--i:${i}` }) as SVGElement;
+    const g = el(d.url ? 'a' : 'g', { class: `n n-${d.kind}${d.pinned ? ' is-pin' : ''}`, style: `--i:${i}`, 'data-id': d.id }) as SVGElement;
     if (d.url) g.setAttribute('href', d.url);
     g.appendChild(el('circle', { class: 'node-aura', r: d.r + 7 * sc }));
     g.appendChild(el('circle', { class: 'ring', r: d.r }));
     if (d.growth && d.growth !== 'impulse') g.appendChild(el('circle', { class: `halo halo-${d.growth}`, r: d.r + 3 * sc }));
+    if (d.pinned) g.appendChild(el('circle', { class: 'pin-ring', r: d.r + 6 * sc }));
     g.appendChild(el('circle', { class: 'dot', r: d.r }));
     g.appendChild(el('text', { y: d.r + 12 * sc + 2, 'text-anchor': 'middle' })).textContent = d.short ?? d.label;
     g.appendChild(el('title')).textContent = d.label + (d.kind === 'ghost' ? ', 아직 쓰지 않은 글' : '');

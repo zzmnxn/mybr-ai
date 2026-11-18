@@ -1,4 +1,24 @@
 # 실제로 확인한 공개 경로만 발행합니다.
+- id: path-devwiki-build
+  title: DevWiki 구축기
+  summary: AI 에이전트의 작업 맥락을 이어가기 위해 시작한 개인 시스템이 어떻게 발전했는지, 구축 배경부터 설계 변화와 현재 아키텍처까지 기록한다.
+  publishedOn: "2026-11-13"
+  steps:
+    - id: step-devwiki-why
+      title: "1편 · 왜, 무엇을 위해 만들었나"
+      description: 세션마다 끊기는 맥락과 사라지는 의사결정에서 출발해 Agent Memory와 Personal Wiki를 함께 만들기로 한 배경을 읽는다.
+      noteUids:
+        - hub-devwiki-why
+    - id: step-devwiki-first-architecture
+      title: "2편 · v1의 지식창고와 에이전트 메모리 설계"
+      description: 번호 폴더와 운영 규칙, 구현하지 못한 메모리 명령, GitHub Actions로 시작한 Inbox 자동화를 읽는다.
+      noteUids:
+        - hub-devwiki-first-architecture
+    - id: step-devwiki-v2-v3
+      title: "3편 · v2·v3 이관과 첫 운영"
+      description: Task 중심의 v2에서 엔트리 중심의 v3로 바꾸고, 첫 dev-memory 스킬과 검증을 보완한 과정을 읽는다.
+      noteUids:
+        - hub-devwiki-v2-v3
 - id: path-cpp-containers
   title: C++ 컨테이너 고르기
   summary: vector에서 시작해 stack·queue, set, map까지 자료구조를 고르는 기준을 순서대로 읽는다.

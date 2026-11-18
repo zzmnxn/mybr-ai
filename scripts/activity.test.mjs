@@ -10,10 +10,11 @@ test('date-only remains unchanged; instants use Seoul and validate calendar date
   assert.equal(calendarDate('2024-02-29').day, '2024-02-29');
   for (const bad of ['2026-02-29', '0000-01-01', '2026-01-01T00:00:00', '2026-02-30T12:00:00Z']) assert.throws(() => calendarDate(bad));
 });
-test('current notes yield exactly eleven stable publish records without private fields', () => {
+test('current notes yield one stable publish record per note without private fields', () => {
   const raw = readNoteSources();
   const first = buildActivities(raw, raw, []);
-  assert.equal(first.length, 11);
+  assert.equal(first.length, raw.length);
+  assert.deepEqual(first.flatMap(e => e.noteUids).sort(), raw.map(n => n.data.uid).sort());
   assert.deepEqual(first, buildActivities(raw, raw, []));
   assert.ok(first.every(e => e.kind === 'publish' && !('file' in e) && !('publishedAt' in e)));
 });

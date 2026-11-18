@@ -4,8 +4,18 @@
 #   section: knowledge
 #   domains: [algorithm]
 #   near: [hub-example-note]
-- id: plan-devwiki
-  title: "devwiki: 개발 지식을 위키로 쌓는 방법"
+- id: plan-devwiki-hooks
+  title: "DevWiki 구축기 4편 — 기록 자동화 훅을 다시 검토하다"
   section: ai-hub
   domains: [ai-llm, devtools]
-  near: [hub-digital-brain-kickoff]
+  near: [hub-devwiki-v2-v3]
+- id: plan-devwiki-curation-evolution
+  title: "DevWiki 구축기 5편 — 로컬 LLM으로 정리를 자동화한 과정"
+  section: ai-hub
+  domains: [ai-llm, devtools]
+  near: [hub-devwiki-first-architecture]
+- id: plan-devwiki-skill-evolution
+  title: "DevWiki 구축기 7편 — 커진 스킬을 절차와 참고 문서로 나누다"
+  section: ai-hub
+  domains: [ai-llm, devtools]
+  near: [hub-devwiki-v2-v3]

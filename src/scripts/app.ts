@@ -39,6 +39,11 @@ function renderFavorites() {
   }));
   nav.hidden = favorites.length === 0;
   for (const b of $$('[data-fav-toggle]')) b.setAttribute('aria-pressed', String(favorites.includes(b.dataset.uid ?? '')));
+  paintFavorites();
+}
+function paintFavorites() {
+  const set = new Set(favorites);
+  for (const n of $$('#brain .n[data-id]')) n.classList.toggle('is-fav', set.has(n.dataset.id ?? ''));
 }
 function bindFavorites() {
   favorites = local.get<string[]>(FAVORITES_KEY, []);
@@ -339,7 +344,7 @@ function setFold(v: boolean) {
 function currentInput(): { nodes: NodeInput[]; links: { source: string; target: string }[] } {
   return {
     nodes: [
-      ...graph.nodes.map(n => ({ id: n.uid, label: n.title, kind: 'post' as Kind, url: n.url, growth: n.growth })),
+      ...graph.nodes.map(n => ({ id: n.uid, label: n.title, kind: 'post' as Kind, url: n.url, growth: n.growth, pinned: n.pinned })),
       ...graph.viewNodes.map(n => ({ id: n.id, label: n.label, kind: KIND[n.type], url: n.url })),
     ], links: [...graph.edges, ...graph.viewLinks],
   };
@@ -364,6 +369,7 @@ function replaceBrain(input: { nodes: NodeInput[]; links: { source: string; targ
       onResize() { threads(); },
     });
   if (graphMode === 'current') brain.trail(trail.filter(id => brain!.has(id)));
+  paintFavorites();
   updateTools();
 }
 

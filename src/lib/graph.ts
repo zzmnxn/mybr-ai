@@ -4,7 +4,7 @@ import { GROWTH, KIND_LABEL, SECTIONS, url, type Growth, type SectionKey } from 
 export type Note = CollectionEntry<'notes'>;
 export type GraphNode = {
   uid: string; title: string; url: string; section: string; kind: string;
-  domains: string[]; growth: Growth; tags: string[];
+  domains: string[]; growth: Growth; tags: string[]; pinned?: boolean;
 };
 export type Relation = 'references' | 'explains' | 'applied-in' | 'part-of' | 'prerequisite' | 'related';
 export type Edge = { source: string; target: string; relation: Relation; origin: 'body-link' | 'frontmatter' | 'approved-inference' };
@@ -81,10 +81,11 @@ async function build(): Promise<GraphData> {
     return true;
   });
 
+  const pinnedUids = new Set((await getCollection('pinned')).map((p) => p.data.noteUid));
   return {
     nodes: notes.map((n) => ({
       uid: n.data.uid, title: n.data.title, url: noteUrl(n), section: n.data.section, kind: n.data.kind,
-      domains: n.data.domains, growth: n.data.growth, tags: n.data.tags,
+      domains: n.data.domains, growth: n.data.growth, tags: n.data.tags, pinned: pinnedUids.has(n.data.uid),
     })),
     edges: unique, viewNodes: [...view.values()], viewLinks,
   };
