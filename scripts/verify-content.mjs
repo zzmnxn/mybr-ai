@@ -42,6 +42,17 @@ for (const { file, data } of notes) {
   }
 }
 
+// 파일명은 `NN-<permalink>.md`이고 번호는 작성(사이트 공개) 순서이며 겹치지 않는다.
+const fileNumbers = new Map();
+for (const { file, data } of notes) {
+  const name = file.split('/').pop();
+  const m = name.match(/^(\d{2,})-(.+)\.md$/);
+  if (!m) { errors.push(`${file}: 파일명은 NN-<permalink>.md 형식이어야 합니다 (예: 19-${data.permalink}.md)`); continue; }
+  if (m[2] !== data.permalink) errors.push(`${file}: 파일명의 이름 부분(${m[2]})이 permalink(${data.permalink})와 다릅니다`);
+  if (fileNumbers.has(m[1])) errors.push(`${file}: 파일 번호 ${m[1]} 중복 (${fileNumbers.get(m[1])})`);
+  fileNumbers.set(m[1], file);
+}
+
 // related는 양방향이어야 한다. A가 B를 related로 선언하면 B도 A를 related로 선언한다.
 const relatedOf = new Map(notes.map((n) => [n.data.uid, new Set((n.data.related ?? []).map((r) => r.uid))]));
 for (const { file, data } of notes) {

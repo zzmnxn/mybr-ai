@@ -19,11 +19,9 @@ type Filter = (typeof FILTERS)[number];
 
 let graph: GraphData = { nodes: [], edges: [], viewNodes: [], viewLinks: [] };
 let brain: Brain | null = null;
-let graphMode: 'current' | 'temporal' = 'current';
 let view = 'map';
 let pageCleanup: (() => void) | undefined;
 let pageMount = 0;
-let trail: string[] = local.get('mybr-trail', []);
 let favorites: string[] = [];
 function renderFavorites() {
   const nav = $('[data-favorites]'), ul = $('[data-favorites-list]');
@@ -192,20 +190,9 @@ function bindFilters() {
   });
 }
 
-/* 읽은 자리를 잇는 길 */
-function walk(id: string) {
-  if (view === 'history' || !brain || trail[trail.length - 1] === id) return;
-  if (trail.length) brain.fire(trail[trail.length - 1], id, 0);
-  trail = [...trail, id].slice(-40);
-  local.set('mybr-trail', trail); brain.trail(trail); showClear();
-}
-function showClear() { $$('.trail-clear').forEach((b) => { b.hidden = !trail.length; }); }
-
-function frameMap(focusId: string | null) {
-  if (!brain || narrow()) return;
-  const [W, H] = brain.size();
-  if (view === 'list') brain.miniOn(focusId, W - 170, H / 2, 0.6);
-  else brain.miniOn(focusId, W - 170, 170, 0.72);
+function frameMap() {
+  if (view === 'map' || view === 'history' || matchMedia('(max-width: 56rem)').matches) brain?.miniOff();
+  else brain?.miniOn(view === 'list' ? 'center' : 'top');
 }
 function focusSet(id: string | undefined) {
   if (!brain || !id || !brain.has(id)) return null;
@@ -228,7 +215,7 @@ function bindReader() {
     if (i === current) return;
     current = i;
     const id = i >= 0 ? `heading-${uid}-${heads[i].id}` : null;
-    brain?.mark(id); if (id) walk(id);
+    brain?.mark(id);
   };
   reader.addEventListener('scroll', spy, { passive: true });
   const prose = $('.prose', reader);
@@ -284,15 +271,13 @@ function syncPage() {
     a.addEventListener('pointerenter', () => { if (view === 'map') brain?.light(`section-${s}`); });
     a.addEventListener('pointerleave', () => brain?.light(null));
   });
-  $('.trail-clear')?.addEventListener('click', () => { trail = []; local.set('mybr-trail', []); brain?.trail([]); showClear(); });
-  showClear(); bindFilters(); applyFilters(); tieRows(); bindReader(); bindFavorites(); bindPaneResize();
+  bindFilters(); applyFilters(); tieRows(); bindReader(); bindFavorites(); bindPaneResize();
   const filterBox = $<HTMLDetailsElement>('.filter-box');
   if (filterBox && !narrow()) filterBox.open = true;
   if (brain) {
     brain.mark(null);
-    if (view === 'map' || view === 'history') { brain.miniOff(); brain.focus(null); }
-    else { brain.focus(brainFocus(focusId)); frameMap(focusId && brain.has(focusId) ? focusId : null); }
-    if (view === 'note' && focusId) walk(focusId);
+    frameMap();
+    brain.focus(view === 'map' || view === 'history' ? null : brainFocus(focusId));
   }
   const activity = $('[data-activity]');
   if (activity) {
@@ -318,9 +303,8 @@ function syncPage() {
   const historyRoot = $('[data-history]');
   if (historyRoot) {
     const mount = pageMount, paused = brain?.isPaused();
-    graphMode = 'temporal';
     replaceBrain({ nodes: [], links: [] }, paused);
-    const restoreCurrent = () => { graphMode = 'current'; replaceBrain(currentInput(), paused); };
+    const restoreCurrent = () => replaceBrain(currentInput(), paused);
     pageCleanup = restoreCurrent;
     void import('./history').then(({ mountHistory }) => {
       if (mount !== pageMount || !historyRoot.isConnected) return;
@@ -366,9 +350,8 @@ function replaceBrain(input: { nodes: NodeInput[]; links: { source: string; targ
       onNode(d, e) { e.preventDefault(); if (d.url) navigate(d.url); },
       onHover(id) { $$('[data-row]').forEach((r) => r.classList.toggle('lit', r.dataset.row === id)); threads(); },
       onFrame: threads,
-      onResize() { threads(); },
+      onResize() { frameMap(); threads(); },
     });
-  if (graphMode === 'current') brain.trail(trail.filter(id => brain!.has(id)));
   paintFavorites();
   updateTools();
 }

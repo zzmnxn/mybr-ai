@@ -108,7 +108,6 @@ body, .pane, .reader, .recent, .theme-control summary, .theme-options, .code, .p
 @keyframes flow { to { stroke-dashoffset: -28; } }
 .edge.lit { stroke-width: 1.8; stroke-dasharray: 6 8; animation: flow 900ms linear infinite; filter: drop-shadow(0 0 2px color-mix(in srgb, var(--color-trail) 60%, transparent)); }
 .pulse { r: 3.2; filter: drop-shadow(0 0 6px var(--color-trail)) drop-shadow(0 0 2px var(--color-trail)); }
-.trail { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-trail) 40%, transparent)); }
 .focusing .n:not(.lit) { opacity: 0.14; }
 .focusing .n:not(.lit) .dot { filter: none; }
 .focusing .edge:not(.lit) { stroke-opacity: 0.06; }

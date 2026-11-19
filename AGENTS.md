@@ -19,6 +19,7 @@ One `notes` collection (Astro Content Collections + Zod), Markdown files in `src
 - `uid` is permanent (`know-|exp-|hub-` + kebab-case); `permalink` is the URL key. Never use a frontmatter `slug` field (collides with Astro's entry id).
 - Optional fields are valid only for their `kind`; reject others instead of ignoring them.
 - Cross-document checks (duplicate uid/permalink, dangling references) run in a separate script before build.
+- Note files are named `NN-<permalink>.md` (two-digit-or-longer number = order the note was added to the site, starting at 01, no gaps reused, no duplicates). A new note takes the next number. The number lives only in the file name; `uid`, `permalink` and URLs never change. `npm run verify` enforces the pattern.
 - `related` must be reciprocal: if note A lists B in `related`, B must list A too (`npm run verify` fails otherwise). When writing or editing a note, find notes on the same topic or project and link both ways: a body link (`../<permalink>`) at the relevant sentence plus a `related` entry, in the new note and in the existing note. Do this without being asked, and say so when it touches an already published note.
 
 ## Planned notes (앞으로 쓸 글)

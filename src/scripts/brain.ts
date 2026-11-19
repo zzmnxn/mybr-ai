@@ -38,8 +38,7 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sc = opt.scale;
   const world = svg.appendChild(el('g', { class: 'world' }));
-  const gT = world.appendChild(el('g')), gE = world.appendChild(el('g')), gP = world.appendChild(el('g')), gN = world.appendChild(el('g'));
-  const trailLine = gT.appendChild(el('polyline', { class: 'trail' }));
+  const gE = world.appendChild(el('g')), gP = world.appendChild(el('g')), gN = world.appendChild(el('g'));
 
   const deg = new Map<string, number>();
   opt.links.forEach((l) => { deg.set(l.source, (deg.get(l.source) ?? 0) + 1); deg.set(l.target, (deg.get(l.target) ?? 0) + 1); });
@@ -52,8 +51,9 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
 
   let W = 0, H = 0, cx = 0, cy = 0;
   let mouse: [number, number] | null = null, hover: string | null = null, pin: Set<string> | null = null, gathered: Set<string> | null = null;
-  let trail: string[] = [], view: ZoomTransform = zoomIdentity, saved: ZoomTransform | null = null;
-  let mini = false, touched = false, fitted = false, paused = opt.initiallyPaused ?? reduce, pulses: Pulse[] = [], running = true, last = 0, idle = 0, loopOn = false;
+  let view: ZoomTransform = zoomIdentity, saved: ZoomTransform | null = null;
+  let mini: 'top' | 'center' | null = null;
+  let touched = false, fitted = false, paused = opt.initiallyPaused ?? reduce, pulses: Pulse[] = [], running = true, last = 0, idle = 0, loopOn = false;
 
   for (const [i, d] of nodes.entries()) {
     const g = el(d.url ? 'a' : 'g', { class: `n n-${d.kind}${d.pinned ? ' is-pin' : ''}`, style: `--i:${i}`, 'data-id': d.id }) as SVGElement;
@@ -136,7 +136,10 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
     const w = W, h = H; size();
     if (w !== W || h !== H) {
       (sim.force('x') as ReturnType<typeof forceX<Node>>).x(cx); (sim.force('y') as ReturnType<typeof forceY<Node>>).y(cy);
-      nudge(0.5); if (!touched && !mini) fit(0); opt.onResize();
+      nudge(0.5);
+      if (mini) fitMini();
+      else if (!touched) fit(0);
+      opt.onResize();
     }
   });
   resizeObserver.observe(svg);
@@ -169,14 +172,16 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
       const a = l.source as Node, b = l.target as Node;
       l.line.setAttribute('x1', String(a.px)); l.line.setAttribute('y1', String(a.py)); l.line.setAttribute('x2', String(b.px)); l.line.setAttribute('y2', String(b.py));
     }
-    trailLine.setAttribute('points', trail.map((id) => { const d = byId.get(id); return d ? `${d.px},${d.py}` : ''; }).join(' '));
   }
   function loop(now: number) {
     if (destroyed) return;
     if (running) {
       const dt = Math.min(48, now - last); last = now;
-      if (sim.alpha() > sim.alphaMin()) sim.tick();
-      draw(now); opt.onFrame();
+      const settling = sim.alpha() > sim.alphaMin();
+      if (settling) sim.tick();
+      draw(now);
+      if (mini && settling) fitMini();
+      else opt.onFrame();
       if (!fitted && !touched && !mini && sim.alpha() < 0.08) { fitted = true; fit(900); }
       const moving = pulses; pulses = [];
       for (const p of moving) {
@@ -229,6 +234,13 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
     const k = Math.max(0.6, Math.min(2.4, (room - m * 2) / (x1 - x0 || 1), (H - m * 2) / (y1 - y0 || 1)));
     go(zoomIdentity.translate(left + room / 2 - ((x0 + x1) / 2) * k, H / 2 - ((y0 + y1) / 2) * k).scale(k), ms);
   }
+  function fitMini() {
+    const railWidth = 340, railHeight = mini === 'center' ? H : Math.min(H, railWidth);
+    const xs = nodes.map((d) => d.x), ys = nodes.map((d) => d.y);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const k = Math.min(mini === 'center' ? 0.6 : 0.72, 290 / (x1 - x0 || 1), Math.min(290, railHeight * 0.85) / (y1 - y0 || 1));
+    go(zoomIdentity.translate(W - railWidth / 2 - ((x0 + x1) / 2) * k, railHeight / 2 - ((y0 + y1) / 2) * k).scale(k), 0);
+  }
   go(zoomIdentity.translate(cx - cx * opt.startK, cy - cy * opt.startK).scale(opt.startK), 0);
   draw(0);
   if (paused) { fitted = true; fit(0); opt.onFrame(); } else start();
@@ -245,26 +257,20 @@ export function createBrain(svg: SVGSVGElement, opt: BrainOptions) {
       world.remove(); pulses = [];
       svg.classList.remove('mini', 'focusing', 'zoomed');
     },
-    adj, has: (id: string) => byId.has(id), fire, light: setHover, isPaused: () => paused,
+    adj, has: (id: string) => byId.has(id), light: setHover, isPaused: () => paused,
     focus(set: Set<string> | null) { pin = set; paint(); },
     gather(set: Set<string> | null) { gathered = set; nudge(0.6); },
     fit(ms: number) { touched = false; fit(ms); },
     zoomBy(f: number) { touched = true; sel.interrupt(); if (reduce) sel.call(zoomer.scaleBy, f); else sel.transition().duration(220).call(zoomer.scaleBy, f); },
-    miniOn(id: string | null, mx: number, my: number, k: number) {
-      if (destroyed || !nodes.length) return;
-      // 전체 그래프를 박스(약 300px) 안에 맞춘다. 선택한 글에 중심을 두면 바깥 점이 영역 밖으로 번진다.
-      void id;
+    miniOn(position: 'top' | 'center') {
+      if (destroyed || !nodes.length || mini === position) return;
       if (!mini) saved = view;
-      mini = true; svg.classList.add('mini');
-      const xs = nodes.map((d) => d.x), ys = nodes.map((d) => d.y), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
-      const fitK = Math.min(k, 290 / (x1 - x0 || 1), 290 / (y1 - y0 || 1));
-      go(zoomIdentity.translate(mx - ((x0 + x1) / 2) * fitK, my - ((y0 + y1) / 2) * fitK).scale(fitK), 420);
+      mini = position; svg.classList.add('mini');
+      fitMini();
     },
-    miniOff() { if (!mini) return; mini = false; svg.classList.remove('mini'); go(saved ?? view, 420); },
-    trail(list: string[]) { trail = list; nodes.forEach((d) => d.g.classList.toggle('walked', list.includes(d.id))); draw(performance.now()); },
+    miniOff() { if (!mini) return; mini = null; svg.classList.remove('mini'); go(saved ?? view, 420); },
     mark(id: string | null) { nodes.forEach((d) => d.g.classList.toggle('here', d.id === id)); },
     screen(id: string): [number, number] { const d = byId.get(id)!, b = svg.getBoundingClientRect(); return [b.left + view.x + d.px * view.k, b.top + view.y + d.py * view.k]; },
-    size: () => [W, H] as const,
     setPaused(v: boolean) { if (destroyed) return; paused = v; if (v) { sim.alpha(0); pulses.forEach((p) => p.c.remove()); pulses = []; } else start(); },
   };
 }

@@ -38,14 +38,15 @@ function setup({ dark = false, saved = null, blocked = false } = {}) {
   };
 }
 
-test('dark is the default before first paint regardless of OS preference', () => {
-  const page = setup();
-  assert.equal(page.root.dataset.theme, 'dark');
+test('light is the default before first paint regardless of OS preference', () => {
+  const page = setup({ dark: true });
+  assert.equal(page.root.dataset.theme, 'light');
   page.events.get('DOMContentLoaded')();
-  assert.equal(page.control.textContent, '다크');
-  assert.equal(page.options[2].pressed, 'true');
+  assert.equal(page.control.textContent, '라이트');
+  assert.equal(page.options[1].pressed, 'true');
+  assert.equal(page.options[2].pressed, 'false');
   page.systemChange(false);
-  assert.equal(page.root.dataset.theme, 'dark');
+  assert.equal(page.root.dataset.theme, 'light');
 });
 
 test('saved system preference follows OS changes', () => {
@@ -82,10 +83,10 @@ test('Astro navigation applies the theme before swap and restores the dropdown',
 
 test('unavailable storage and invalid stored values fall back safely', () => {
   const page = setup({ blocked: true });
-  assert.equal(page.root.dataset.theme, 'dark');
-  page.choose('light');
   assert.equal(page.root.dataset.theme, 'light');
-  assert.equal(setup({ saved: 'unexpected' }).root.dataset.theme, 'dark');
+  page.choose('dark');
+  assert.equal(page.root.dataset.theme, 'dark');
+  assert.equal(setup({ saved: 'unexpected' }).root.dataset.theme, 'light');
 });
 
 
